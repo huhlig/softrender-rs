@@ -1,0 +1,20 @@
+[package]
+name = "render"
+edition = "2018"
+version = "0.1.0"
+authors = ["Hans W. Uhlig <hans.uhlig@ibm.com>"]
+
+[dependencies]
+minifb = "0.10"
+
+[dev-dependencies]
+assert_approx_eq = "1.1.0"
+pretty_assertions = "0.6.1"
+
+#[[bin]]
+#name = "rasterizer"
+#path = "src/demo_rasterizer.rs"
+
+#[[bin]]
+#name = "raytracer"
+#path = "src/demo_raytracer.rs"
