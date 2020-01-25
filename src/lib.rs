@@ -15,7 +15,7 @@
 //
 #![forbid(unsafe_code)]
 
-pub mod canvas;
+pub mod image;
 pub mod math;
 //pub mod model;
 //mod rasterizer;

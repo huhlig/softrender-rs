@@ -1,5 +1,5 @@
 //
-// Copyright 2017 Hans W. Uhlig.
+// Copyright 2020 Hans W. Uhlig.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,12 @@
 //
 
 
-mod fragment;
-mod pipeline;
-mod vertex;
+mod canvas;
+mod channel;
+mod color;
+mod image;
+
+pub use self::canvas::Canvas;
+pub use self::channel::Channel;
+pub use self::color::Color;
+pub use self::image::Image;
