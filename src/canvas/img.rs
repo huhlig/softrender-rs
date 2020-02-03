@@ -14,13 +14,7 @@
 // limitations under the License.
 //
 
-
-mod canvas;
-mod channel;
-mod color;
-mod image;
-
-pub use self::canvas::Canvas;
-pub use self::channel::Channel;
-pub use self::color::Color;
-pub use self::image::Image;
+pub struct Image {
+    dimensions:
+    buffer: Vec<u32>
+}

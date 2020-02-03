@@ -20,7 +20,6 @@ use super::Color;
 pub struct Canvas {
     dimensions: (usize, usize),
     color_buffer: Vec<Color>,
-    image_buffer: Vec<u32>,
 }
 
 impl Canvas {
@@ -29,7 +28,6 @@ impl Canvas {
         Self {
             dimensions: (width, height),
             color_buffer: vec![Color::black(); width * height],
-            image_buffer: vec![Color::black().to_rgba(); width * height],
         }
     }
     /// Get Width of Canvas
@@ -51,6 +49,7 @@ impl Canvas {
         assert!(x < self.dimensions.0);
         assert!(y < self.dimensions.1);
         self.color_buffer[(y * self.dimensions.0) + x] = color;
+        self.image_buffer[(y * self.dimensions.0) + x] = color.to_argb();
     }
     /// As a u32 buffer slice for MiniFB
     pub fn as_slice(&self) -> &[u32] {
