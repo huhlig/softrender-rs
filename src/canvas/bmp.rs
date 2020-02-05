@@ -17,15 +17,16 @@
 use super::Canvas;
 use std::io::{Result, Write};
 
-pub struct BMP;
+pub trait BMP {
+    fn to_bmp<T: Write>(&self, output: &mut T) -> Result<()>;
+}
 
-impl BMP {
-    pub fn from_canvas(canvas: &Canvas) -> Result<Vec<u8>> {
+impl BMP for Canvas {
+    fn to_bmp<T: Write>(&self, output: &mut T) -> Result<()> {
         use byteorder::{LittleEndian, WriteBytesExt};
 
-        let data_size = canvas.width() * canvas.height() * 4;
+        let data_size = self.width() * self.height() * 4;
         let file_size = 14 + 40 + data_size;
-        let mut output = Vec::with_capacity(file_size);
         // BMP Header - 14 Bytes
         output.write_u8(0x42)?; // Magic Number (BM) - 2 bytes
         output.write_u8(0x4D)?; // Magic Number (BM) - 2 bytes
@@ -57,6 +58,6 @@ impl BMP {
             }
         }
 
-        Ok(output)
+        Ok(())
     }
 }

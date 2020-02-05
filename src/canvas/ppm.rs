@@ -17,25 +17,20 @@
 use super::Canvas;
 use std::io::{Result, Write};
 
-pub struct PPM{
-    dimensions: (usize,usize),
-    buffer: Vec<(u8)>,
+pub trait PPM {
+    fn to_ppm<T: Write>(&self, output: &mut T) -> Result<()>;
 }
 
-impl PPM {
-    pub fn from_canvas(&mut self, canvas: &Canvas) {
-
-    }
-    pub fn to_file(canvas: &Canvas) -> Result<Vec<u8>> {
-        let mut output = Vec::with_capacity(20 + canvas.width() * canvas.height() * 12);
+impl PPM for Canvas {
+    fn to_ppm<T: Write>(&self, output: &mut T) -> Result<()> {
         write!(output, "P3\n")?;
-        write!(output, "{} {}\n", canvas.width(), canvas.height())?;
+        write!(output, "{} {}\n", self.width(), self.height())?;
         write!(output, "255\n")?;
 
         let mut count = 0;
-        for y in 0..canvas.height() {
-            for x in 0..canvas.width() {
-                let color = canvas.get(x, y);
+        for y in 0..self.height() {
+            for x in 0..self.width() {
+                let color = self.get(x, y);
                 write!(output, "{} {} {}", u8::from(color.r), u8::from(color.g), u8::from(color.b))?;
                 if count < 4 {
                     write!(output, " ")?;
@@ -47,6 +42,6 @@ impl PPM {
             }
         }
 
-        Ok(output)
+        Ok(())
     }
 }
