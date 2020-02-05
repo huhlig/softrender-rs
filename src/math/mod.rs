@@ -14,10 +14,16 @@
 // limitations under the License.
 //
 
+mod mat2f;
+mod mat3f;
 mod mat4f;
+mod vec2f;
 mod vec3f;
 mod vec4f;
 
+pub use self::mat2f::Mat2f;
+pub use self::mat3f::Mat3f;
 pub use self::mat4f::Mat4f;
+pub use self::vec2f::Vec2f;
 pub use self::vec3f::Vec3f;
 pub use self::vec4f::Vec4f;

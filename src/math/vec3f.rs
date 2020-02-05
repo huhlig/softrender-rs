@@ -60,8 +60,8 @@ impl Vec3f {
     ///
     /// Cross Product
     ///
-    pub fn cross(l: Vec3f, r: Vec3f) -> Vec3f {
-        Vec3f {
+    pub fn cross(l: Vec3f, r: Vec3f) -> Self {
+        Self {
             x: (l.y * r.z) - (l.z * r.y),
             y: (l.z * r.x) - (l.x * r.z),
             z: (l.x * r.y) - (l.y * r.x),
@@ -81,7 +81,7 @@ impl Default for Vec3f {
 
 impl From<Vec4f> for Vec3f {
     fn from(value: Vec4f) -> Self {
-        Vec3f { x: value.x, y: value.y, z: value.z }
+        Self { x: value.x, y: value.y, z: value.z }
     }
 }
 
@@ -91,8 +91,8 @@ impl fmt::Display for Vec3f {
     }
 }
 
-impl PartialEq<Vec3f> for Vec3f {
-    fn eq(&self, other: &Vec3f) -> bool {
+impl PartialEq<Self> for Vec3f {
+    fn eq(&self, other: &Self) -> bool {
         let eps = 1.0e-6;
         let x = (self.x - other.x) < eps;
         let y = (self.y - other.y) < eps;
@@ -280,14 +280,14 @@ mod tests {
     use super::Vec3f;
 
     #[test]
-    fn test_vec4f_addition() {
+    fn test_vec3f_addition() {
         let a1 = Vec3f::new(3.0, -2.0, 5.0);
         let a2 = Vec3f::new(-2.0, 3.0, 1.0);
         assert_eq!(a1 + a2, Vec3f::new(1.0, 1.0, 6.0));
     }
 
     #[test]
-    fn test_vec4f_subtraction() {
+    fn test_vec3f_subtraction() {
         let p1 = Vec3f::new(3.0, 2.0, 1.0);
         let p2 = Vec3f::new(5.0, 6.0, 7.0);
         assert_eq!(p1 - p2, Vec3f::new(-2.0, -4.0, -6.0));

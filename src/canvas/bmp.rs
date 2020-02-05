@@ -61,3 +61,59 @@ impl BMP for Canvas {
         Ok(())
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use crate::canvas::{Canvas, Color, BMP};
+
+    //#[test]
+    fn test_to_bmp() {
+        let c = {
+            let mut c = Canvas::new(5, 3);
+            c.set(0, 0, Color::new(1.5, 0.0, 0.0));
+            c.set(2, 1, Color::new(0.0, 0.5, 0.0));
+            c.set(4, 2, Color::new(-0.5, 0.0, 1.0));
+            c
+        };
+        let expected = vec![
+            // FILE HEADER
+            0x42, 0x4D, // Magic Number
+            0xFF, 0xFF, 0xFF, 0xFF, // File Size - TODO - Calculate
+            0x00, 0x00, 0x00, 0x00, // Reserved
+            0x00, 0x00, 0x00, 0x36, // Data Offset
+            // DIB HEADER
+            0x28, // DIB Header Size
+            0x00, 0x00, 0x00, 0x00, // Width
+            0x00, 0x00, 0x00, 0x00, // Height
+            0x00, 0x00, 0x00, 0x01, // Color Planes
+            0x00, 0x00, 0x00, 0x20, // Bits Per Pixel
+            0x00, 0x00, 0x00, 0x00, // Compression
+            0x00, 0x00, 0x00, 0x00, // Data Size -- TODO - Calculate
+            0x00, 0x00, 0x00, 0x00, // Horizontal Resolution
+            0x00, 0x00, 0x00, 0x00, // Vertical Resolution
+            0x00, 0x00, 0x00, 0x00, // Colors in Palette
+            0x00, 0x00, 0x00, 0x00, // Important Colors in Palette
+            // Image Data
+            0x00, 0x00, 0x00, 0x00, // Pixel (0, 0)
+            0x00, 0x00, 0x00, 0x00, // Pixel (1, 0)
+            0x00, 0x00, 0x00, 0x00, // Pixel (2, 0)
+            0x00, 0x00, 0x00, 0x00, // Pixel (3, 0)
+            0x00, 0x00, 0x00, 0x00, // Pixel (4, 0)
+            0x00, 0x00, 0x00, 0x00, // Pixel (0, 1)
+            0x00, 0x00, 0x00, 0x00, // Pixel (1, 1)
+            0x00, 0x00, 0x00, 0x00, // Pixel (2, 1)
+            0x00, 0x00, 0x00, 0x00, // Pixel (3, 1)
+            0x00, 0x00, 0x00, 0x00, // Pixel (4, 1)
+            0x00, 0x00, 0x00, 0x00, // Pixel (0, 2)
+            0x00, 0x00, 0x00, 0x00, // Pixel (1, 2)
+            0x00, 0x00, 0x00, 0x00, // Pixel (2, 2)
+            0x00, 0x00, 0x00, 0x00, // Pixel (3, 2)
+            0x00, 0x00, 0x00, 0x00, // Pixel (4, 2)
+        ];
+
+        let mut result = Vec::with_capacity(20 + c.width() * c.height() * 4);
+        c.to_bmp(&mut result).unwrap();
+        assert_eq!(result, expected);
+    }
+}

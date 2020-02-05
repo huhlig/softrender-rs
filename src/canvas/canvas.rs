@@ -68,23 +68,4 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_to_ppm() {
-        let c = {
-            let mut c = Canvas::new(5, 3);
-            c.set(0, 0, Color::new(1.5, 0.0, 0.0));
-            c.set(2, 1, Color::new(0.0, 0.5, 0.0));
-            c.set(4, 2, Color::new(-0.5, 0.0, 1.0));
-            c
-        };
-        let expected = Vec::from(
-            "P3\n\
-             5 3\n\
-             255\n\
-             255 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n\
-             0 0 0 0 0 0 0 127 0 0 0 0 0 0 0\n\
-             0 0 0 0 0 0 0 0 0 0 0 0 0 0 255\n");
-        let result = c.to_ppm().unwrap();
-        assert_eq!(result, expected);
-    }
 }

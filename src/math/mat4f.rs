@@ -158,11 +158,30 @@ impl ops::Mul<Mat4f> for Mat4f {
 #[cfg(test)]
 mod tests {
     use super::Mat4f;
+    use assert_approx_eq::assert_approx_eq;
 
     #[test]
-    #[allow(non_snake_case)]
+    fn test_creation() {
+        let m = Mat4f::from_array(
+            [
+                [1.0, 2.0, 3.0, 4.0],
+                [5.5, 6.5, 7.5, 8.5],
+                [9.0, 10.0, 11.0, 12.0],
+                [13.5, 14.5, 15.5, 16.5],
+            ]
+        );
+        assert_approx_eq!(m.m00, 1.0);
+        assert_approx_eq!(m.m03, 4.0);
+        assert_approx_eq!(m.m10, 5.5);
+        assert_approx_eq!(m.m12, 7.5);
+        assert_approx_eq!(m.m22, 11.0);
+        assert_approx_eq!(m.m30, 13.5);
+        assert_approx_eq!(m.m32, 15.5);
+    }
+
+    #[test]
     fn test_multiply() {
-        let A = Mat4f::from_array(
+        let a = Mat4f::from_array(
             [
                 [1.0, 2.0, 3.0, 4.0],
                 [4.0, 3.0, 2.0, 1.0],
@@ -170,7 +189,7 @@ mod tests {
                 [4.0, 3.0, 2.0, 1.0],
             ]
         );
-        let B = Mat4f::from_array(
+        let b = Mat4f::from_array(
             [
                 [4.0, 3.0, 2.0, 1.0],
                 [1.0, 2.0, 3.0, 4.0],
@@ -178,7 +197,7 @@ mod tests {
                 [1.0, 2.0, 3.0, 4.0],
             ]
         );
-        let C = Mat4f::from_array(
+        let c = Mat4f::from_array(
             [
                 [22.0, 24.0, 26.0, 28.0],
                 [28.0, 26.0, 24.0, 22.0],
@@ -186,44 +205,6 @@ mod tests {
                 [28.0, 26.0, 24.0, 22.0],
             ]
         );
-        let D = A * B;
-        assert_eq!(C, D);
+        assert_eq!(a * b, c);
     }
 }
-
-// static mat4 operator*(const mat4& a, const mat4& b) {
-//    mat4 out;
-//    __m128 row1 = _mm_loadu_ps(&a.data()[0]), row2 = _mm_loadu_ps(&a.data()[4]), row3 = _mm_loadu_ps(&a.data()[8]), row4 = _mm_loadu_ps(&a.data()[12]);
-//    __m128 col1, col2, col3, col4;
-//    __m128 row;
-//
-//    col1 = _mm_set_ps1(b.data()[0]);
-//    col2 = _mm_set_ps1(b.data()[1]);
-//    col3 = _mm_set_ps1(b.data()[2]);
-//    col4 = _mm_set_ps1(b.data()[3]);
-//    row = _mm_add_ps(_mm_add_ps(_mm_mul_ps(row1, col1), _mm_mul_ps(row2, col2)), _mm_add_ps(_mm_mul_ps(row3, col3), _mm_mul_ps(row4, col4)));
-//    _mm_storeu_ps(&out.data()[0], row);
-//
-//    col1 = _mm_set_ps1(b.data()[4]);
-//    col2 = _mm_set_ps1(b.data()[5]);
-//    col3 = _mm_set_ps1(b.data()[6]);
-//    col4 = _mm_set_ps1(b.data()[7]);
-//    row = _mm_add_ps(_mm_add_ps(_mm_mul_ps(row1, col1), _mm_mul_ps(row2, col2)), _mm_add_ps(_mm_mul_ps(row3, col3), _mm_mul_ps(row4, col4)));
-//    _mm_storeu_ps(&out.data()[4], row);
-//
-//    col1 = _mm_set_ps1(b.data()[8]);
-//    col2 = _mm_set_ps1(b.data()[9]);
-//    col3 = _mm_set_ps1(b.data()[10]);
-//    col4 = _mm_set_ps1(b.data()[11]);
-//    row = _mm_add_ps(_mm_add_ps(_mm_mul_ps(row1, col1), _mm_mul_ps(row2, col2)), _mm_add_ps(_mm_mul_ps(row3, col3), _mm_mul_ps(row4, col4)));
-//    _mm_storeu_ps(&out.data()[8], row);
-//
-//    col1 = _mm_set_ps1(b.data()[12]);
-//    col2 = _mm_set_ps1(b.data()[13]);
-//    col3 = _mm_set_ps1(b.data()[14]);
-//    col4 = _mm_set_ps1(b.data()[15]);
-//    row = _mm_add_ps(_mm_add_ps(_mm_mul_ps(row1, col1), _mm_mul_ps(row2, col2)), _mm_add_ps(_mm_mul_ps(row3, col3), _mm_mul_ps(row4, col4)));
-//    _mm_storeu_ps(&out.data()[12], row);
-//
-//    return out;
-//}

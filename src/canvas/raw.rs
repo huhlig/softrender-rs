@@ -23,7 +23,7 @@ pub trait RAW {
 
 impl RAW for Canvas {
     fn to_raw<T: Write>(&self, output: &mut T) -> Result<()> {
-        use byteorder::{LittleEndian, WriteBytesExt};
+        use byteorder::WriteBytesExt;
 
         // Write out Image Data
         for y in 0..self.height() {

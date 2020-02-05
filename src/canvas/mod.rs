@@ -14,14 +14,16 @@
 // limitations under the License.
 //
 
-mod raw;
+mod bmp;
 mod canvas;
 mod channel;
 mod color;
 mod ppm;
-mod bmp;
+mod raw;
 
+pub use self::bmp::BMP;
 pub use self::canvas::Canvas;
 pub use self::channel::Channel;
 pub use self::color::Color;
-pub use self::raw::Image;
+pub use self::ppm::PPM;
+pub use self::raw::RAW;
