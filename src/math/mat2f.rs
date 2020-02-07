@@ -78,12 +78,15 @@ mod tests {
     fn test_creation() {
         let m = Mat2f::from_array(
             [
-                [1.0, 2.0],
-                [5.5, 6.5],
+                [-3.0, 5.0],
+                [1.0, -2.0],
             ]
         );
-        assert_approx_eq!(m.m00, 1.0);
-        assert_approx_eq!(m.m10, 5.5);
+        assert_approx_eq!(m.m00, -3.0);
+        assert_approx_eq!(m.m01, 5.0);
+        assert_approx_eq!(m.m10, 1.0);
+        assert_approx_eq!(m.m11, -2.0);
+
     }
 
     #[test]

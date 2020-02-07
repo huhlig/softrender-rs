@@ -82,13 +82,13 @@ impl fmt::Display for Vec4f {
     }
 }
 
-impl PartialEq<Vec4f> for Vec4f {
-    fn eq(&self, other: &Vec4f) -> bool {
+impl PartialEq<Self> for Vec4f {
+    fn eq(&self, other: &Self) -> bool {
         let eps = 1.0e-6;
-        let x = (self.x - other.x) < eps;
-        let y = (self.y - other.y) < eps;
-        let z = (self.z - other.z) < eps;
-        let w = (self.w - other.w) < eps;
+        let x = (self.x - other.x).abs() < std::f32::EPSILON;
+        let y = (self.y - other.y).abs() < std::f32::EPSILON;
+        let z = (self.z - other.z).abs() < std::f32::EPSILON;
+        let w = (self.w - other.w).abs() < std::f32::EPSILON;
         x & y & z & w
     }
 }

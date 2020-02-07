@@ -73,9 +73,8 @@ impl fmt::Display for Vec2f {
 
 impl PartialEq<Self> for Vec2f {
     fn eq(&self, other: &Self) -> bool {
-        let eps = 1.0e-6;
-        let x = (self.x - other.x) < eps;
-        let y = (self.y - other.y) < eps;
+        let x = (self.x - other.x).abs() < std::f32::EPSILON;
+        let y = (self.y - other.y).abs() < std::f32::EPSILON;
         x & y
     }
 }
@@ -292,5 +291,4 @@ mod tests {
         let b = Vec2f::new(2.0, 3.0);
         assert_approx_eq!(a.dot(b), 20.0)
     }
-
 }

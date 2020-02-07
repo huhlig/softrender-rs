@@ -99,15 +99,14 @@ mod tests {
     fn test_creation() {
         let m = Mat3f::from_array(
             [
-                [1.0, 2.0, 3.0],
-                [5.5, 6.5, 7.5],
-                [9.0, 10.0, 11.0],
+                [-3.0, 5.0, 0.0],
+                [1.0, -2.0, -7.0],
+                [0.0, 1.0, 1.0],
             ]
         );
-        assert_approx_eq!(m.m00, 1.0);
-        assert_approx_eq!(m.m10, 5.5);
-        assert_approx_eq!(m.m12, 7.5);
-        assert_approx_eq!(m.m22, 11.0);
+        assert_approx_eq!(m.m00, -3.0);
+        assert_approx_eq!(m.m11, -2.0);
+        assert_approx_eq!(m.m22, 1.0);
     }
 
     #[test]
@@ -133,6 +132,6 @@ mod tests {
                 [22.0, 24.0, 26.0],
             ]
         );
-        assert_eq!(a*b,c);
+        assert_eq!(a * b, c);
     }
 }
