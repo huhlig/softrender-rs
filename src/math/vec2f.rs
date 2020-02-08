@@ -16,7 +16,7 @@
 
 use std::{fmt, ops};
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Vec2f {
     pub x: f32,
     pub y: f32,
@@ -65,17 +65,9 @@ impl Default for Vec2f {
     }
 }
 
-impl fmt::Display for Vec2f {
+impl fmt::Debug for Vec2f {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({}, {})", self.x, self.y)
-    }
-}
-
-impl PartialEq<Self> for Vec2f {
-    fn eq(&self, other: &Self) -> bool {
-        let x = (self.x - other.x).abs() < std::f32::EPSILON;
-        let y = (self.y - other.y).abs() < std::f32::EPSILON;
-        x & y
+        write!(f, "[{}, {}]", self.x, self.y)
     }
 }
 
@@ -274,14 +266,14 @@ mod tests {
         assert_eq!(Vec2f::new(0.0, 0.0).magnitude(), 0.0);
         assert_eq!(Vec2f::new(1.0, 0.0).magnitude(), 1.0);
         assert_eq!(Vec2f::new(0.0, 1.0).magnitude(), 1.0);
-        assert_eq!(Vec2f::new(1.0, 2.0).magnitude(), 14.0f32.sqrt());
-        assert_eq!(Vec2f::new(-1.0, -2.0).magnitude(), 14.0f32.sqrt());
+        assert_eq!(Vec2f::new(1.0, 2.0).magnitude(), 5.0f32.sqrt());
+        assert_eq!(Vec2f::new(-1.0, -2.0).magnitude(), 5.0f32.sqrt());
     }
 
     #[test]
     fn test_normalization() {
         assert_eq!(Vec2f::new(4.0, 0.0).normalize(), Vec2f::new(1.0, 0.0));
-        assert_eq!(Vec2f::new(1.0, 2.0).normalize(), Vec2f::new(0.26726124, 0.5345225));
+        assert_eq!(Vec2f::new(1.0, 2.0).normalize(), Vec2f::new(0.4472135955, 0.894427191));
         assert_approx_eq!(Vec2f::new(1.0, 2.0).normalize().magnitude(), 1.0);
     }
 
@@ -289,6 +281,6 @@ mod tests {
     fn test_dot_product() {
         let a = Vec2f::new(1.0, 2.0);
         let b = Vec2f::new(2.0, 3.0);
-        assert_approx_eq!(a.dot(b), 20.0)
+        assert_approx_eq!(a.dot(b), 8.0)
     }
 }

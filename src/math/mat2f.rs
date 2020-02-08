@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
+use super::Vec2f;
 use std::{fmt, ops};
 
 #[derive(Copy, Clone, PartialEq)]
@@ -40,6 +42,26 @@ impl Mat2f {
             m11: 1.0,
         }
     }
+    pub fn transpose(&self) -> Self {
+        Self {
+            m00: self.m00,
+            m01: self.m10,
+            m10: self.m01,
+            m11: self.m11,
+        }
+    }
+    pub fn determinant(&self) -> f32 {
+        //     0  1
+        // 0 | A, B |
+        // 1 | C, D | = AD - BC
+        (self.m00 * self.m11) - (self.m01 * self.m10)
+    }
+}
+
+impl Default for Mat2f {
+    fn default() -> Self {
+        Self::identity()
+    }
 }
 
 impl fmt::Debug for Mat2f {
@@ -51,15 +73,35 @@ impl fmt::Debug for Mat2f {
     }
 }
 
-
-impl ops::Mul<Mat2f> for Mat2f {
+impl ops::Add<Self> for Mat2f {
     type Output = Self;
 
-    ///     0  1  2       0  1  2                  0             1             2             3
-    /// 0 | A, B, C |   | a, b, c |   | Aa + Be + Ci, Ab + Bf + Cj, Ac + Bg + Ck, Ad + Bh + Cl |
-    /// 1 | E, F, G | x | e, f, g | = | Ea + Fe + Gi, Eb + Ff + Gj, Ec + Fg + Gk, Ed + Fh + Gl |
-    /// 2 | I, J, K |   | i, j, k |   | Ia + Je + Ki, Ib + Jf + Kj, Ic + Jg + Kk, Id + Jh + Kl |
-    fn mul(self, rhs: Mat2f) -> Self {
+    ///     0  1       0  1           0      1
+    /// 0 | A, B |   | a, b |   | A + a, B + b |
+    /// 1 | C, D | + | c, D | = | C + c, D + d |
+    fn add(self, rhs: Self) -> Self {
+        Self {
+            m00: self.m00 + rhs.m00,
+            m01: self.m01 + rhs.m01,
+            m10: self.m10 + rhs.m10,
+            m11: self.m11 + rhs.m11,
+        }
+    }
+}
+
+impl ops::AddAssign<Self> for Mat2f {
+    fn add_assign(&mut self, rhs: Self) {
+        *self = *self + rhs;
+    }
+}
+
+impl ops::Mul<Self> for Mat2f {
+    type Output = Self;
+
+    ///     0  1       0  1             0        1
+    /// 0 | A, B |   | a, b |   | Aa + Bc, Ab + Bd |
+    /// 1 | C, D | x | c, d | = | Ca + Dc, Cb + Dd |
+    fn mul(self, rhs: Self) -> Self {
         Self {
             m00: (self.m00 * rhs.m00) + (self.m01 * rhs.m10),
             m01: (self.m00 * rhs.m01) + (self.m01 * rhs.m11),
@@ -69,9 +111,52 @@ impl ops::Mul<Mat2f> for Mat2f {
     }
 }
 
+impl ops::MulAssign<Self> for Mat2f {
+    fn mul_assign(&mut self, rhs: Self) {
+        *self = *self * rhs;
+    }
+}
+
+impl ops::Mul<Vec2f> for Mat2f {
+    type Output = Vec2f;
+
+    ///     0  1       0  1          0
+    /// 0 | A, B |   | x |   | Ax + By |
+    /// 1 | C, D | x | y | = | Cx + Dy |
+    fn mul(self, rhs: Vec2f) -> Vec2f {
+        Vec2f {
+            x: (self.m00 * rhs.x) + (self.m01 * rhs.y),
+            y: (self.m10 * rhs.x) + (self.m11 * rhs.y),
+        }
+    }
+}
+
+impl ops::Sub<Self> for Mat2f {
+    type Output = Self;
+
+    ///     0  1       0  1           0      1
+    /// 0 | A, B |   | a, b |   | A - a, B - b |
+    /// 1 | C, D | - | c, d | = | C - c, D - d |
+    fn sub(self, rhs: Self) -> Self {
+        Self {
+            m00: self.m00 - rhs.m00,
+            m01: self.m01 - rhs.m01,
+            m10: self.m10 - rhs.m10,
+            m11: self.m11 - rhs.m11,
+        }
+    }
+}
+
+impl ops::SubAssign<Self> for Mat2f {
+    fn sub_assign(&mut self, rhs: Self) {
+        *self = *self - rhs;
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
-    use super::Mat2f;
+    use super::{Mat2f, Vec2f};
     use assert_approx_eq::assert_approx_eq;
 
     #[test]
@@ -86,11 +171,44 @@ mod tests {
         assert_approx_eq!(m.m01, 5.0);
         assert_approx_eq!(m.m10, 1.0);
         assert_approx_eq!(m.m11, -2.0);
-
     }
 
     #[test]
-    fn test_multiply() {
+    fn test_transpose() {
+        let a = Mat2f::from_array(
+            [
+                [1.0, 2.0],
+                [3.0, 4.0],
+            ]
+        );
+        let b = Mat2f::from_array(
+            [
+                [1.0, 3.0],
+                [2.0, 4.0],
+            ]
+        );
+        assert_eq!(a.transpose(), b);
+    }
+
+    #[test]
+    fn test_partialeq() {
+        let a = Mat2f::from_array(
+            [
+                [1.0 + 1.0, 2.0 + 2.0],
+                [1.5 - 0.5, 3.0],
+            ]
+        );
+        let b = Mat2f::from_array(
+            [
+                [2.0, 4.0],
+                [1.0, 1.5 + 1.5],
+            ]
+        );
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn test_add_mat2f() {
         let a = Mat2f::from_array(
             [
                 [1.0, 2.0],
@@ -105,10 +223,138 @@ mod tests {
         );
         let c = Mat2f::from_array(
             [
-                [22.0, 24.0],
-                [28.0, 26.0],
+                [5.0, 5.0],
+                [5.0, 5.0],
+            ]
+        );
+        assert_eq!(a + b, c);
+    }
+
+    #[test]
+    fn test_addassign_mat2f() {
+        let mut a = Mat2f::from_array(
+            [
+                [1.0, 2.0],
+                [4.0, 3.0],
+            ]
+        );
+        a += Mat2f::from_array(
+            [
+                [4.0, 3.0],
+                [1.0, 2.0],
+            ]
+        );
+        let c = Mat2f::from_array(
+            [
+                [5.0, 5.0],
+                [5.0, 5.0],
+            ]
+        );
+        assert_eq!(a, c);
+    }
+
+    #[test]
+    fn test_mul_mat2f() {
+        let a = Mat2f::from_array(
+            [
+                [1.0, 2.0],
+                [4.0, 3.0],
+            ]
+        );
+        let b = Mat2f::from_array(
+            [
+                [4.0, 3.0],
+                [1.0, 2.0],
+            ]
+        );
+        let c = Mat2f::from_array(
+            [
+                [6.0, 7.0],
+                [19.0, 18.0],
             ]
         );
         assert_eq!(a * b, c);
+    }
+
+    #[test]
+    fn test_mulassign_mat2f() {
+        let mut a = Mat2f::from_array(
+            [
+                [1.0, 2.0],
+                [4.0, 3.0],
+            ]
+        );
+        a *= Mat2f::from_array(
+            [
+                [4.0, 3.0],
+                [1.0, 2.0],
+            ]
+        );
+        let c = Mat2f::from_array(
+            [
+                [6.0, 7.0],
+                [19.0, 18.0],
+            ]
+        );
+        assert_eq!(a, c);
+    }
+
+    #[test]
+    fn test_mul_vec2f() {
+        let a = Mat2f::from_array(
+            [
+                [1.0, 2.0],
+                [3.0, 4.0],
+            ]
+        );
+        let b = Vec2f::new(5.0, 6.0);
+        let c = Vec2f::new(17.0, 39.0);
+        assert_eq!(a * b, c);
+    }
+
+    #[test]
+    fn test_sub_mat2f() {
+        let a = Mat2f::from_array(
+            [
+                [1.0, 2.0],
+                [4.0, 3.0],
+            ]
+        );
+        let b = Mat2f::from_array(
+            [
+                [4.0, 3.0],
+                [1.0, 2.0],
+            ]
+        );
+        let c = Mat2f::from_array(
+            [
+                [-3.0, -1.0],
+                [3.0, 1.0],
+            ]
+        );
+        assert_eq!(a - b, c);
+    }
+
+    #[test]
+    fn test_subassign_mat2f() {
+        let mut a = Mat2f::from_array(
+            [
+                [1.0, 2.0],
+                [4.0, 3.0],
+            ]
+        );
+        a -= Mat2f::from_array(
+            [
+                [4.0, 3.0],
+                [1.0, 2.0],
+            ]
+        );
+        let c = Mat2f::from_array(
+            [
+                [-3.0, -1.0],
+                [3.0, 1.0],
+            ]
+        );
+        assert_eq!(a, c);
     }
 }

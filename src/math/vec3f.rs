@@ -17,7 +17,7 @@
 use std::{fmt, ops};
 use super::{Mat4f, Vec4f};
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Vec3f {
     pub x: f32,
     pub y: f32,
@@ -85,21 +85,9 @@ impl From<Vec4f> for Vec3f {
     }
 }
 
-impl fmt::Display for Vec3f {
+impl fmt::Debug for Vec3f {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({}, {}, {})", self.x, self.y, self.z)
-    }
-}
-
-impl PartialEq<Self> for Vec3f {
-    fn eq(&self, other: &Self) -> bool {
-        let x = (self.x - other.x).abs() < std::f32::EPSILON;
-        ;
-        let y = (self.y - other.y).abs() < std::f32::EPSILON;
-        ;
-        let z = (self.z - other.z).abs() < std::f32::EPSILON;
-        ;
-        x & y & z
+        write!(f, "[{}, {}, {}]", self.x, self.y, self.z)
     }
 }
 
