@@ -69,17 +69,23 @@ impl Mat3f {
             m22: self.m22,
         }
     }
-    pub fn invert(&self) -> Option<Mat2f> {
+    fn determinant(&self) -> f32 {
+        self.m00 * (self.m11 * self.m22 - self.m21 * self.m12)
+            - self.m10 * (self.m01 * self.m22 - self.m21 * self.m02)
+            + self.m20 * (self.m01 * self.m12 - self.m11 * self.m02)
+    }
+    fn invert(&self) -> Option<Mat3f> {
         let det = self.determinant();
         if det == 0.0 {
             None
         } else {
-            Some(Self {
-                m00: self.m11 / det,
-                m01: -self.m01 / det,
-                m10: -self.m10 / det,
-                m11: self.m00 / det,
-            })
+            Some(
+                Mat3f::from_cols(
+                    self[1].cross(self[2]) / det,
+                    self[2].cross(self[0]) / det,
+                    self[0].cross(self[1]) / det,
+                )                    .transpose(),
+            )
         }
     }
 }
