@@ -13,9 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-use super::{Mat2f, Vec3f};
+use super::Vec3f;
 use std::{fmt, ops};
 
+///
+/// A 3x3 Matrix of 32 bit floats.
+///
 #[derive(Copy, Clone, PartialEq)]
 pub struct Mat3f {
     pub m00: f32,
@@ -30,7 +33,43 @@ pub struct Mat3f {
 }
 
 impl Mat3f {
-    pub fn from_array(data: [[f32; 3]; 3]) -> Mat3f {
+    /// Create 3x3 Matrix from an array of column arrays.
+    ///
+    /// ```
+    /// use softrender::math::Mat3f;
+    ///
+    /// let m = Mat3f::from_array_cols(
+    ///     [
+    ///         [1.0, 2.0, 3.0],
+    ///         [4.0, 5.0, 6.0],
+    ///         [4.0, 5.0, 6.0],
+    ///     ]
+    /// );
+    /// ```
+    ///
+    ///               0  1
+    /// ( a, c )    | a, b | 0
+    /// ( b, d )  = | c, d | 1
+    pub fn from_array_cols(data: [[f32; 3]; 3]) -> Mat3f {
+        // (a, d, g)    | a, b, c |
+        // (b, e, h)    | d, e, f |
+        // (c, f, i)    | g, h, i |
+        Mat3f {
+            m00: data[0][0],
+            m01: data[1][0],
+            m02: data[2][0],
+            m10: data[0][1],
+            m11: data[1][1],
+            m12: data[2][1],
+            m20: data[0][2],
+            m21: data[1][2],
+            m22: data[2][2],
+        }
+    }
+    pub fn from_array_rows(data: [[f32; 3]; 3]) -> Mat3f {
+        // (a, b, c)   | a, b, c |
+        // (d, e, f) = | d, e, f |
+        // (g, h, i)   | g, h, i |
         Mat3f {
             m00: data[0][0],
             m01: data[0][1],
@@ -42,6 +81,20 @@ impl Mat3f {
             m21: data[2][1],
             m22: data[2][2],
         }
+    }
+    pub fn rows(&self) -> [[f32; 3]; 3] {
+        [
+            [self.m00, self.m01, self.m02],
+            [self.m10, self.m11, self.m12],
+            [self.m20, self.m21, self.m22],
+        ]
+    }
+    pub fn cols(&self) -> [[f32; 3]; 3] {
+        [
+            [self.m00, self.m10, self.m20],
+            [self.m01, self.m11, self.m21],
+            [self.m02, self.m12, self.m22],
+        ]
     }
     pub fn identity() -> Mat3f {
         Mat3f {
@@ -69,23 +122,28 @@ impl Mat3f {
             m22: self.m22,
         }
     }
-    fn determinant(&self) -> f32 {
-        self.m00 * (self.m11 * self.m22 - self.m21 * self.m12)
-            - self.m10 * (self.m01 * self.m22 - self.m21 * self.m02)
-            + self.m20 * (self.m01 * self.m12 - self.m11 * self.m02)
+    pub fn determinant(&self) -> f32 {
+        let b01 = self.m00 * (self.m11 * self.m22 - self.m21 * self.m12);
+        let b02 = self.m10 * (self.m01 * self.m22 - self.m21 * self.m02);
+        let b03 = self.m20 * (self.m01 * self.m12 - self.m11 * self.m02);
+        b01 - b02 + b03
     }
-    fn invert(&self) -> Option<Mat3f> {
+    pub fn invert(&self) -> Option<Mat3f> {
         let det = self.determinant();
         if det == 0.0 {
             None
         } else {
+            None
+            /*
             Some(
-                Mat3f::from_cols(
+                Mat3f::from_cols([
                     self[1].cross(self[2]) / det,
                     self[2].cross(self[0]) / det,
                     self[0].cross(self[1]) / det,
-                )                    .transpose(),
+        ]
+                ).transpose(),
             )
+            */
         }
     }
 }
@@ -209,18 +267,19 @@ impl ops::SubAssign<Self> for Mat3f {
 
 #[cfg(test)]
 mod tests {
-    use super::{Mat2f, Mat3f, Vec3f};
+    use super::{Mat3f, Vec3f};
     use assert_approx_eq::assert_approx_eq;
 
     #[test]
-    fn test_creation() {
-        let m = Mat3f::from_array(
-            [
-                [-3.0, 5.0, 0.0],
-                [1.0, -2.0, -7.0],
-                [0.0, 1.0, 1.0],
-            ]
-        );
+    fn test_rows() {
+        let a = [
+            [-3.0, 5.0, 0.0],
+            [1.0, -2.0, -7.0],
+            [0.0, 1.0, 1.0],
+        ];
+        let m = Mat3f::from_array_rows(a.clone());
+        let b = m.rows();
+        assert_eq!(a, b);
         assert_approx_eq!(m.m00, -3.0);
         assert_approx_eq!(m.m11, -2.0);
         assert_approx_eq!(m.m22, 1.0);
@@ -228,51 +287,64 @@ mod tests {
 
     #[test]
     fn test_transpose() {
-        let a = Mat3f::from_array(
+        let a = Mat3f::from_array_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        let b = Mat2f::from_array(
+        let b = Mat3f::from_array_rows(
             [
-                [-3.0, 02.0],
-                [00.0, 06.0],
+                [1.0, 4.0, 7.0],
+                [2.0, 5.0, 8.0],
+                [3.0, 6.0, 9.0]
             ]
         );
         assert_eq!(a.transpose(), b);
     }
 
     #[test]
-    fn test_submatrix() {
-        let a = Mat3f::from_array(
+    fn test_determinant() {
+        let a = Mat3f::from_array_rows(
             [
-                [01.0, 05.0, 00.0],
-                [-3.0, 02.0, 07.0],
-                [00.0, 06.0, -3.0],
+                [1.0, 2.0, 3.0],
+                [3.0, 1.0, 2.0],
+                [3.0, 2.0, 1.0],
             ]
         );
-        let b = Mat2f::from_array(
+        assert_approx_eq!(a.determinant(), 8.0)
+    }
+
+    #[test]
+    fn test_invert() {
+        let a = Mat3f::from_array_rows(
             [
-                [-6.0, 01.0, 06.0],
-                [-8.0, 05.0, 06.0],
-                [-7.0, 01.0, 01.0],
+                [1.0, 2.0, 3.0],
+                [3.0, 1.0, 2.0],
+                [3.0, 2.0, 1.0],
             ]
         );
-        assert_eq!(a.submatrix(2, 1), b);
+        let b = Mat3f::from_array_rows(
+            [
+                [-0.375, 0.5, 0.125],
+                [0.5, -1.0, 0.5],
+                [0.125, 0.5, -0.375],
+            ]
+        );
+        assert_eq!(a.invert().unwrap(), b)
     }
 
     #[test]
     fn test_partialeq() {
-        let a = Mat3f::from_array(
+        let a = Mat3f::from_array_rows(
             [
                 [1.0 + 1.0, 2.0 + 2.0, 3.0 + 1.5],
                 [1.5 - 0.5, 3.0, 2.25 + 1.10],
                 [3.0 / 2.0, 4.0 * 2.0, 4.5],
             ]
         );
-        let b = Mat3f::from_array(
+        let b = Mat3f::from_array_rows(
             [
                 [2.0, 4.0, 4.5],
                 [1.0, 3.0, 3.35],
@@ -284,21 +356,21 @@ mod tests {
 
     #[test]
     fn test_add_mat3f() {
-        let a = Mat3f::from_array(
+        let a = Mat3f::from_array_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        let b = Mat3f::from_array(
+        let b = Mat3f::from_array_rows(
             [
                 [9.0, 8.0, 7.0],
                 [6.0, 5.0, 4.0],
                 [3.0, 2.0, 1.0],
             ]
         );
-        let c = Mat3f::from_array(
+        let c = Mat3f::from_array_rows(
             [
                 [10.0, 10.0, 10.0],
                 [10.0, 10.0, 10.0],
@@ -310,21 +382,21 @@ mod tests {
 
     #[test]
     fn test_addassign_mat3f() {
-        let mut a = Mat3f::from_array(
+        let mut a = Mat3f::from_array_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        a += Mat3f::from_array(
+        a += Mat3f::from_array_rows(
             [
                 [9.0, 8.0, 7.0],
                 [6.0, 5.0, 4.0],
                 [3.0, 2.0, 1.0],
             ]
         );
-        let c = Mat3f::from_array(
+        let c = Mat3f::from_array_rows(
             [
                 [10.0, 10.0, 10.0],
                 [10.0, 10.0, 10.0],
@@ -336,21 +408,21 @@ mod tests {
 
     #[test]
     fn test_mul_mat3f() {
-        let a = Mat3f::from_array(
+        let a = Mat3f::from_array_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        let b = Mat3f::from_array(
+        let b = Mat3f::from_array_rows(
             [
                 [9.0, 8.0, 7.0],
                 [6.0, 5.0, 4.0],
                 [3.0, 2.0, 1.0],
             ]
         );
-        let c = Mat3f::from_array(
+        let c = Mat3f::from_array_rows(
             [
                 [30.0, 24.0, 18.0],
                 [84.0, 69.0, 54.0],
@@ -362,21 +434,21 @@ mod tests {
 
     #[test]
     fn test_mulassign_mat3f() {
-        let mut a = Mat3f::from_array(
+        let mut a = Mat3f::from_array_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        a *= Mat3f::from_array(
+        a *= Mat3f::from_array_rows(
             [
                 [9.0, 8.0, 7.0],
                 [6.0, 5.0, 4.0],
                 [3.0, 2.0, 1.0],
             ]
         );
-        let c = Mat3f::from_array(
+        let c = Mat3f::from_array_rows(
             [
                 [30.0, 24.0, 18.0],
                 [84.0, 69.0, 54.0],
@@ -388,35 +460,35 @@ mod tests {
 
     #[test]
     fn test_mul_vec3f() {
-        let a = Mat3f::from_array(
+        let a = Mat3f::from_array_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        let b = Vec3f::new(10.0, 11.0, 12.0);
-        let c = Vec3f::new(68.0, 167.0, 266.0);
+        let b = Vec3f::from_parts(10.0, 11.0, 12.0);
+        let c = Vec3f::from_parts(68.0, 167.0, 266.0);
         assert_eq!(a * b, c);
     }
 
     #[test]
     fn test_sub_mat3f() {
-        let a = Mat3f::from_array(
+        let a = Mat3f::from_array_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        let b = Mat3f::from_array(
+        let b = Mat3f::from_array_rows(
             [
                 [9.0, 8.0, 7.0],
                 [6.0, 5.0, 4.0],
                 [3.0, 2.0, 1.0],
             ]
         );
-        let c = Mat3f::from_array(
+        let c = Mat3f::from_array_rows(
             [
                 [-8.0, -6.0, -4.0],
                 [-2.0, 0.0, 2.0],
@@ -428,21 +500,21 @@ mod tests {
 
     #[test]
     fn test_subassign_mat3f() {
-        let mut a = Mat3f::from_array(
+        let mut a = Mat3f::from_array_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        a -= Mat3f::from_array(
+        a -= Mat3f::from_array_rows(
             [
                 [9.0, 8.0, 7.0],
                 [6.0, 5.0, 4.0],
                 [3.0, 2.0, 1.0],
             ]
         );
-        let c = Mat3f::from_array(
+        let c = Mat3f::from_array_rows(
             [
                 [-8.0, -6.0, -4.0],
                 [-2.0, 0.0, 2.0],

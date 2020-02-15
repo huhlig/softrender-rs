@@ -17,6 +17,9 @@
 use std::{fmt, ops};
 use super::{Mat4f, Vec4f};
 
+///
+/// 3 Dimensional Vector
+///
 #[derive(Copy, Clone, PartialEq)]
 pub struct Vec3f {
     pub x: f32,
@@ -28,8 +31,20 @@ impl Vec3f {
     ///
     /// Create a new `Vec3f`
     ///
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
+    pub fn from_parts(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z }
+    }
+    ///
+    /// Create a new `Vec3f`
+    ///
+    pub fn from_array(data: [f32; 3]) -> Self {
+        Self { x: data[0], y: data[1], z: data[2] }
+    }
+    ///
+    /// Turn Vec3f into an Array
+    ///
+    pub fn to_array(&self) -> [f32; 3] {
+        [self.x, self.y, self.z]
     }
     ///
     /// Normalize Vector
@@ -255,7 +270,6 @@ impl ops::Sub<Self> for Vec3f {
     }
 }
 
-
 impl ops::SubAssign<Self> for Vec3f {
     fn sub_assign(&mut self, rhs: Self) {
         self.x -= rhs.x;
@@ -264,87 +278,121 @@ impl ops::SubAssign<Self> for Vec3f {
     }
 }
 
+impl From<[f32; 3]> for Vec3f {
+    fn from(other: [f32; 3]) -> Self {
+        Vec3f::from_array(other)
+    }
+}
+
+impl From<Vec3f> for [f32; 3] {
+    fn from(other: Vec3f) -> Self {
+        other.to_array()
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use assert_approx_eq::assert_approx_eq;
     use super::Vec3f;
 
     #[test]
+    fn test_from_parts() {
+        let a = Vec3f::from_parts(3.0, -2.0, 5.0);
+        assert_approx_eq!(a.x, 3.0);
+        assert_approx_eq!(a.x, -2.0);
+        assert_approx_eq!(a.x, 5.0);
+    }
+
+    #[test]
+    fn test_from_array() {
+        let a = Vec3f::from_array([3.0, -2.0, 5.0]);
+        assert_approx_eq!(a.x, 3.0);
+        assert_approx_eq!(a.x, -2.0);
+        assert_approx_eq!(a.x, 5.0);
+    }
+
+    #[test]
+    fn test_to_array() {
+        assert_eq!(Vec3f::from_parts(3.0, -2.0, 5.0).to_array(), [3.0, -2.0, 5.0]);
+    }
+
+    #[test]
     fn test_vec3f_addition() {
-        let a1 = Vec3f::new(3.0, -2.0, 5.0);
-        let a2 = Vec3f::new(-2.0, 3.0, 1.0);
-        assert_eq!(a1 + a2, Vec3f::new(1.0, 1.0, 6.0));
+        let a1 = Vec3f::from_parts(3.0, -2.0, 5.0);
+        let a2 = Vec3f::from_parts(-2.0, 3.0, 1.0);
+        assert_eq!(a1 + a2, Vec3f::from_parts(1.0, 1.0, 6.0));
     }
 
     #[test]
     fn test_vec3f_subtraction() {
-        let p1 = Vec3f::new(3.0, 2.0, 1.0);
-        let p2 = Vec3f::new(5.0, 6.0, 7.0);
-        assert_eq!(p1 - p2, Vec3f::new(-2.0, -4.0, -6.0));
+        let p1 = Vec3f::from_parts(3.0, 2.0, 1.0);
+        let p2 = Vec3f::from_parts(5.0, 6.0, 7.0);
+        assert_eq!(p1 - p2, Vec3f::from_parts(-2.0, -4.0, -6.0));
 
-        let p = Vec3f::new(3.0, 2.0, 1.0);
-        let v = Vec3f::new(5.0, 6.0, 7.0);
-        assert_eq!(p - v, Vec3f::new(-2.0, -4.0, -6.0));
+        let p = Vec3f::from_parts(3.0, 2.0, 1.0);
+        let v = Vec3f::from_parts(5.0, 6.0, 7.0);
+        assert_eq!(p - v, Vec3f::from_parts(-2.0, -4.0, -6.0));
 
-        let v1 = Vec3f::new(3.0, 2.0, 1.0);
-        let v2 = Vec3f::new(5.0, 6.0, 7.0);
-        assert_eq!(v1 - v2, Vec3f::new(-2.0, -4.0, -6.0));
+        let v1 = Vec3f::from_parts(3.0, 2.0, 1.0);
+        let v2 = Vec3f::from_parts(5.0, 6.0, 7.0);
+        assert_eq!(v1 - v2, Vec3f::from_parts(-2.0, -4.0, -6.0));
 
-        let zero = Vec3f::new(0.0, 0.0, 0.0);
-        let v = Vec3f::new(1.0, -2.0, 3.0);
-        assert_eq!(zero - v, Vec3f::new(-1.0, 2.0, -3.0));
+        let zero = Vec3f::from_parts(0.0, 0.0, 0.0);
+        let v = Vec3f::from_parts(1.0, -2.0, 3.0);
+        assert_eq!(zero - v, Vec3f::from_parts(-1.0, 2.0, -3.0));
     }
 
     #[test]
     fn test_negation() {
-        let a = Vec3f::new(1.0, -2.0, 3.0);
-        assert_eq!(-a, Vec3f::new(-1.0, 2.0, -3.0));
+        let a = Vec3f::from_parts(1.0, -2.0, 3.0);
+        assert_eq!(-a, Vec3f::from_parts(-1.0, 2.0, -3.0));
     }
 
     #[test]
     fn test_scalar_multiplication() {
-        let a = Vec3f::new(1.0, -2.0, 3.0);
-        assert_eq!(a * 3.5, Vec3f::new(3.5, -7.0, 10.5));
+        let a = Vec3f::from_parts(1.0, -2.0, 3.0);
+        assert_eq!(a * 3.5, Vec3f::from_parts(3.5, -7.0, 10.5));
 
-        let b = Vec3f::new(1.0, -2.0, 3.0);
-        assert_eq!(b * 0.5, Vec3f::new(0.5, -1.0, 1.5));
+        let b = Vec3f::from_parts(1.0, -2.0, 3.0);
+        assert_eq!(b * 0.5, Vec3f::from_parts(0.5, -1.0, 1.5));
     }
 
     #[test]
     fn test_scalar_division() {
-        let a = Vec3f::new(1.0, -2.0, 3.0);
-        assert_eq!(a / 2.0, Vec3f::new(0.5, -1.0, 1.5));
+        let a = Vec3f::from_parts(1.0, -2.0, 3.0);
+        assert_eq!(a / 2.0, Vec3f::from_parts(0.5, -1.0, 1.5));
     }
 
     #[test]
     fn test_magnitude() {
-        assert_eq!(Vec3f::new(0.0, 0.0, 0.0).magnitude(), 0.0);
-        assert_eq!(Vec3f::new(1.0, 0.0, 0.0).magnitude(), 1.0);
-        assert_eq!(Vec3f::new(0.0, 1.0, 0.0).magnitude(), 1.0);
-        assert_eq!(Vec3f::new(0.0, 0.0, 1.0).magnitude(), 1.0);
-        assert_eq!(Vec3f::new(1.0, 2.0, 3.0).magnitude(), 14.0f32.sqrt());
-        assert_eq!(Vec3f::new(-1.0, -2.0, -3.0).magnitude(), 14.0f32.sqrt());
+        assert_eq!(Vec3f::from_parts(0.0, 0.0, 0.0).magnitude(), 0.0);
+        assert_eq!(Vec3f::from_parts(1.0, 0.0, 0.0).magnitude(), 1.0);
+        assert_eq!(Vec3f::from_parts(0.0, 1.0, 0.0).magnitude(), 1.0);
+        assert_eq!(Vec3f::from_parts(0.0, 0.0, 1.0).magnitude(), 1.0);
+        assert_eq!(Vec3f::from_parts(1.0, 2.0, 3.0).magnitude(), 14.0f32.sqrt());
+        assert_eq!(Vec3f::from_parts(-1.0, -2.0, -3.0).magnitude(), 14.0f32.sqrt());
     }
 
     #[test]
     fn test_normalization() {
-        assert_eq!(Vec3f::new(4.0, 0.0, 0.0).normalize(), Vec3f::new(1.0, 0.0, 0.0));
-        assert_eq!(Vec3f::new(1.0, 2.0, 3.0).normalize(), Vec3f::new(0.26726124, 0.5345225, 0.8017837));
-        assert_approx_eq!(Vec3f::new(1.0, 2.0, 3.0).normalize().magnitude(), 1.0);
+        assert_eq!(Vec3f::from_parts(4.0, 0.0, 0.0).normalize(), Vec3f::from_parts(1.0, 0.0, 0.0));
+        assert_eq!(Vec3f::from_parts(1.0, 2.0, 3.0).normalize(), Vec3f::from_parts(0.26726124, 0.5345225, 0.8017837));
+        assert_approx_eq!(Vec3f::from_parts(1.0, 2.0, 3.0).normalize().magnitude(), 1.0);
     }
 
     #[test]
     fn test_dot_product() {
-        let a = Vec3f::new(1.0, 2.0, 3.0);
-        let b = Vec3f::new(2.0, 3.0, 4.0);
+        let a = Vec3f::from_parts(1.0, 2.0, 3.0);
+        let b = Vec3f::from_parts(2.0, 3.0, 4.0);
         assert_approx_eq!(a.dot(b), 20.0)
     }
 
     #[test]
     fn test_cross_product() {
-        let a = Vec3f::new(1.0, 2.0, 3.0);
-        let b = Vec3f::new(2.0, 3.0, 4.0);
-        assert_eq!(Vec3f::cross(a, b), Vec3f::new(-1.0, 2.0, -1.0));
-        assert_eq!(Vec3f::cross(b, a), Vec3f::new(1.0, -2.0, 1.0));
+        let a = Vec3f::from_parts(1.0, 2.0, 3.0);
+        let b = Vec3f::from_parts(2.0, 3.0, 4.0);
+        assert_eq!(Vec3f::cross(a, b), Vec3f::from_parts(-1.0, 2.0, -1.0));
+        assert_eq!(Vec3f::cross(b, a), Vec3f::from_parts(1.0, -2.0, 1.0));
     }
 }

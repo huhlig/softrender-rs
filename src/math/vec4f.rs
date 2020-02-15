@@ -17,6 +17,9 @@
 use std::{fmt, ops};
 use super::{Mat4f, Vec3f};
 
+///
+/// 4 Dimensional Vector
+///
 #[derive(Copy, Clone, Debug)]
 pub struct Vec4f {
     pub x: f32,
@@ -27,10 +30,22 @@ pub struct Vec4f {
 
 impl Vec4f {
     ///
-    /// Create a new `Vec4f`
+    /// Create a new `Vec4f` from parts
     ///
-    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
+    pub fn from_parts(x: f32, y: f32, z: f32, w: f32) -> Self {
         Self { x, y, z, w }
+    }
+    ///
+    /// Create a new `Vec4f` from an array
+    ///
+    pub fn from_array(data: [f32; 4]) -> Self {
+        Self { x: data[0], y: data[1], z: data[2], w: data[3] }
+    }
+    ///
+    /// Create an array from a Vec4f
+    ///
+    pub fn to_array(&self) -> [f32; 4] {
+        [self.x, self.y, self.z, self.w]
     }
     ///
     /// Normalize Vector
@@ -280,6 +295,18 @@ impl ops::SubAssign<Self> for Vec4f {
     }
 }
 
+impl From<Vec4f> for [f32; 4] {
+    fn from(other: Vec4f) -> Self {
+        other.to_array()
+    }
+}
+
+impl From<[f32; 4]> for Vec4f {
+    fn from(other: [f32; 4]) -> Self {
+        Self::from_array(other)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use assert_approx_eq::assert_approx_eq;
@@ -287,73 +314,73 @@ mod tests {
 
     #[test]
     fn test_vec4f_addition() {
-        let a1 = Vec4f::new(3.0, -2.0, 5.0, 1.0);
-        let a2 = Vec4f::new(-2.0, 3.0, 1.0, 0.0);
-        assert_eq!(a1 + a2, Vec4f::new(1.0, 1.0, 6.0, 1.0));
+        let a1 = Vec4f::from_parts(3.0, -2.0, 5.0, 1.0);
+        let a2 = Vec4f::from_parts(-2.0, 3.0, 1.0, 0.0);
+        assert_eq!(a1 + a2, Vec4f::from_parts(1.0, 1.0, 6.0, 1.0));
     }
 
     #[test]
     fn test_vec4f_subtraction() {
-        let p1 = Vec4f::new(3.0, 2.0, 1.0, 1.0);
-        let p2 = Vec4f::new(5.0, 6.0, 7.0, 1.0);
-        assert_eq!(p1 - p2, Vec4f::new(-2.0, -4.0, -6.0, 0.0));
+        let p1 = Vec4f::from_parts(3.0, 2.0, 1.0, 1.0);
+        let p2 = Vec4f::from_parts(5.0, 6.0, 7.0, 1.0);
+        assert_eq!(p1 - p2, Vec4f::from_parts(-2.0, -4.0, -6.0, 0.0));
 
-        let p = Vec4f::new(3.0, 2.0, 1.0, 1.0);
-        let v = Vec4f::new(5.0, 6.0, 7.0, 0.0);
-        assert_eq!(p - v, Vec4f::new(-2.0, -4.0, -6.0, 1.0));
+        let p = Vec4f::from_parts(3.0, 2.0, 1.0, 1.0);
+        let v = Vec4f::from_parts(5.0, 6.0, 7.0, 0.0);
+        assert_eq!(p - v, Vec4f::from_parts(-2.0, -4.0, -6.0, 1.0));
 
-        let v1 = Vec4f::new(3.0, 2.0, 1.0, 0.0);
-        let v2 = Vec4f::new(5.0, 6.0, 7.0, 0.0);
-        assert_eq!(v1 - v2, Vec4f::new(-2.0, -4.0, -6.0, 0.0));
+        let v1 = Vec4f::from_parts(3.0, 2.0, 1.0, 0.0);
+        let v2 = Vec4f::from_parts(5.0, 6.0, 7.0, 0.0);
+        assert_eq!(v1 - v2, Vec4f::from_parts(-2.0, -4.0, -6.0, 0.0));
 
-        let zero = Vec4f::new(0.0, 0.0, 0.0, 0.0);
-        let v = Vec4f::new(1.0, -2.0, 3.0, 0.0);
-        assert_eq!(zero - v, Vec4f::new(-1.0, 2.0, -3.0, 0.0));
+        let zero = Vec4f::from_parts(0.0, 0.0, 0.0, 0.0);
+        let v = Vec4f::from_parts(1.0, -2.0, 3.0, 0.0);
+        assert_eq!(zero - v, Vec4f::from_parts(-1.0, 2.0, -3.0, 0.0));
     }
 
     #[test]
     fn test_negation() {
-        let a = Vec4f::new(1.0, -2.0, 3.0, -4.0);
-        assert_eq!(-a, Vec4f::new(-1.0, 2.0, -3.0, 4.0));
+        let a = Vec4f::from_parts(1.0, -2.0, 3.0, -4.0);
+        assert_eq!(-a, Vec4f::from_parts(-1.0, 2.0, -3.0, 4.0));
     }
 
     #[test]
     fn test_scalar_multiplication() {
-        let a = Vec4f::new(1.0, -2.0, 3.0, -4.0);
-        assert_eq!(a * 3.5, Vec4f::new(3.5, -7.0, 10.5, -14.0));
+        let a = Vec4f::from_parts(1.0, -2.0, 3.0, -4.0);
+        assert_eq!(a * 3.5, Vec4f::from_parts(3.5, -7.0, 10.5, -14.0));
 
-        let b = Vec4f::new(1.0, -2.0, 3.0, -4.0);
-        assert_eq!(b * 0.5, Vec4f::new(0.5, -1.0, 1.5, -2.0));
+        let b = Vec4f::from_parts(1.0, -2.0, 3.0, -4.0);
+        assert_eq!(b * 0.5, Vec4f::from_parts(0.5, -1.0, 1.5, -2.0));
     }
 
     #[test]
     fn test_scalar_division() {
-        let a = Vec4f::new(1.0, -2.0, 3.0, -4.0);
-        assert_eq!(a / 2.0, Vec4f::new(0.5, -1.0, 1.5, -2.0));
+        let a = Vec4f::from_parts(1.0, -2.0, 3.0, -4.0);
+        assert_eq!(a / 2.0, Vec4f::from_parts(0.5, -1.0, 1.5, -2.0));
     }
 
     #[test]
     fn test_magnitude() {
-        assert_eq!(Vec4f::new(0.0, 0.0, 0.0, 0.0).magnitude(), 0.0);
-        assert_eq!(Vec4f::new(1.0, 0.0, 0.0, 0.0).magnitude(), 1.0);
-        assert_eq!(Vec4f::new(0.0, 1.0, 0.0, 0.0).magnitude(), 1.0);
-        assert_eq!(Vec4f::new(0.0, 0.0, 1.0, 0.0).magnitude(), 1.0);
-        assert_eq!(Vec4f::new(0.0, 0.0, 0.0, 1.0).magnitude(), 1.0);
-        assert_eq!(Vec4f::new(1.0, 2.0, 3.0, 0.0).magnitude(), 14.0f32.sqrt());
-        assert_eq!(Vec4f::new(-1.0, -2.0, -3.0, 0.0).magnitude(), 14.0f32.sqrt());
+        assert_eq!(Vec4f::from_parts(0.0, 0.0, 0.0, 0.0).magnitude(), 0.0);
+        assert_eq!(Vec4f::from_parts(1.0, 0.0, 0.0, 0.0).magnitude(), 1.0);
+        assert_eq!(Vec4f::from_parts(0.0, 1.0, 0.0, 0.0).magnitude(), 1.0);
+        assert_eq!(Vec4f::from_parts(0.0, 0.0, 1.0, 0.0).magnitude(), 1.0);
+        assert_eq!(Vec4f::from_parts(0.0, 0.0, 0.0, 1.0).magnitude(), 1.0);
+        assert_eq!(Vec4f::from_parts(1.0, 2.0, 3.0, 0.0).magnitude(), 14.0f32.sqrt());
+        assert_eq!(Vec4f::from_parts(-1.0, -2.0, -3.0, 0.0).magnitude(), 14.0f32.sqrt());
     }
 
     #[test]
     fn test_normalization() {
-        assert_eq!(Vec4f::new(4.0, 0.0, 0.0, 0.0).normalize(), Vec4f::new(1.0, 0.0, 0.0, 0.0));
-        assert_eq!(Vec4f::new(1.0, 2.0, 3.0, 0.0).normalize(), Vec4f::new(0.26726124, 0.5345225, 0.8017837, 0.0));
-        assert_approx_eq!(Vec4f::new(1.0, 2.0, 3.0, 0.0).normalize().magnitude(), 1.0);
+        assert_eq!(Vec4f::from_parts(4.0, 0.0, 0.0, 0.0).normalize(), Vec4f::from_parts(1.0, 0.0, 0.0, 0.0));
+        assert_eq!(Vec4f::from_parts(1.0, 2.0, 3.0, 0.0).normalize(), Vec4f::from_parts(0.26726124, 0.5345225, 0.8017837, 0.0));
+        assert_approx_eq!(Vec4f::from_parts(1.0, 2.0, 3.0, 0.0).normalize().magnitude(), 1.0);
     }
 
     #[test]
     fn test_dot_product() {
-        let a = Vec4f::new(1.0, 2.0, 3.0, 0.0);
-        let b = Vec4f::new(2.0, 3.0, 4.0, 0.0);
+        let a = Vec4f::from_parts(1.0, 2.0, 3.0, 0.0);
+        let b = Vec4f::from_parts(2.0, 3.0, 4.0, 0.0);
         assert_approx_eq!(a.dot(b), 20.0)
     }
 }

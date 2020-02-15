@@ -16,6 +16,9 @@
 
 use std::{fmt, ops};
 
+///
+/// 2 Dimensional Vector
+///
 #[derive(Copy, Clone, PartialEq)]
 pub struct Vec2f {
     pub x: f32,
@@ -24,10 +27,22 @@ pub struct Vec2f {
 
 impl Vec2f {
     ///
-    /// Create a new `Vec2f`
+    /// Create a new `Vec2f` from parts.
     ///
-    pub fn new(x: f32, y: f32) -> Self {
+    pub fn from_parts(x: f32, y: f32) -> Self {
         Self { x, y }
+    }
+    ///
+    /// Create a new `Vec2f` from array.
+    ///
+    pub fn from_array(data: [f32; 2]) -> Self {
+        Self { x: data[0], y: data[1] }
+    }
+    ///
+    /// Create a new [f32,f32] array from Vector
+    ///
+    pub fn to_array(&self) -> [f32; 2] {
+        [self.x, self.y]
     }
     ///
     /// Normalize Vector
@@ -48,12 +63,16 @@ impl Vec2f {
         }
     }
     ///
-    /// Dot Product
+    /// Dot Product of two vectors
     ///
     pub fn dot(&self, rhs: Self) -> f32 {
         self.x * rhs.x + self.y * rhs.y
     }
-    /// Magnitude
+    ///
+    /// Magnitude of vector
+    ///
+    /// sqrt(( x * x ) + ( y * y ))
+    ///
     pub fn magnitude(&self) -> f32 {
         ((self.x * self.x) + (self.y * self.y)).sqrt()
     }
@@ -201,11 +220,22 @@ impl ops::Sub<Self> for Vec2f {
     }
 }
 
-
 impl ops::SubAssign<Self> for Vec2f {
     fn sub_assign(&mut self, rhs: Self) {
         self.x -= rhs.x;
         self.y -= rhs.y;
+    }
+}
+
+impl From<Vec2f> for [f32; 2] {
+    fn from(other: Vec2f) -> Self {
+        other.to_array()
+    }
+}
+
+impl From<[f32; 2]> for Vec2f {
+    fn from(other: [f32; 2]) -> Self {
+        Vec2f::from_array(other)
     }
 }
 
@@ -215,72 +245,91 @@ mod tests {
     use super::Vec2f;
 
     #[test]
+    fn test_from_parts() {
+        let a = Vec2f::from_parts(3.0, -2.0);
+        assert_eq!(a.x, 3.0);
+        assert_eq!(a.y, -2.0);
+    }
+
+    #[test]
+    fn test_from_array() {
+        let a = Vec2f::from_array([3.0, -2.0]);
+        assert_eq!(a.x, 3.0);
+        assert_eq!(a.y, -2.0);
+    }
+
+    #[test]
+    fn test_to_array() {
+        assert_eq!(Vec2f::from_parts(3.0, -2.0).to_array(), [3.0, -2.0]);
+    }
+
+    #[test]
     fn test_vec2f_addition() {
-        let a1 = Vec2f::new(3.0, -2.0);
-        let a2 = Vec2f::new(-2.0, 3.0);
-        assert_eq!(a1 + a2, Vec2f::new(1.0, 1.0));
+        let a1 = Vec2f::from_parts(3.0, -2.0);
+        let a2 = Vec2f::from_parts(-2.0, 3.0);
+        assert_eq!(a1 + a2, Vec2f::from_parts(1.0, 1.0));
     }
 
     #[test]
     fn test_vec2f_subtraction() {
-        let p1 = Vec2f::new(3.0, 2.0);
-        let p2 = Vec2f::new(5.0, 6.0);
-        assert_eq!(p1 - p2, Vec2f::new(-2.0, -4.0));
+        let p1 = Vec2f::from_parts(3.0, 2.0);
+        let p2 = Vec2f::from_parts(5.0, 6.0);
+        assert_eq!(p1 - p2, Vec2f::from_parts(-2.0, -4.0));
 
-        let p = Vec2f::new(3.0, 2.0);
-        let v = Vec2f::new(5.0, 6.0);
-        assert_eq!(p - v, Vec2f::new(-2.0, -4.0));
+        let p = Vec2f::from_parts(3.0, 2.0);
+        let v = Vec2f::from_parts(5.0, 6.0);
+        assert_eq!(p - v, Vec2f::from_parts(-2.0, -4.0));
 
-        let v1 = Vec2f::new(3.0, 2.0);
-        let v2 = Vec2f::new(5.0, 6.0);
-        assert_eq!(v1 - v2, Vec2f::new(-2.0, -4.0));
+        let v1 = Vec2f::from_parts(3.0, 2.0);
+        let v2 = Vec2f::from_parts(5.0, 6.0);
+        assert_eq!(v1 - v2, Vec2f::from_parts(-2.0, -4.0));
 
-        let zero = Vec2f::new(0.0, 0.0);
-        let v = Vec2f::new(1.0, -2.0);
-        assert_eq!(zero - v, Vec2f::new(-1.0, 2.0));
+        let zero = Vec2f::from_parts(0.0, 0.0);
+        let v = Vec2f::from_parts(1.0, -2.0);
+        assert_eq!(zero - v, Vec2f::from_parts(-1.0, 2.0));
     }
 
     #[test]
     fn test_negation() {
-        let a = Vec2f::new(1.0, -2.0);
-        assert_eq!(-a, Vec2f::new(-1.0, 2.0));
+        let a = Vec2f::from_parts(1.0, -2.0);
+        assert_eq!(-a, Vec2f::from_parts(-1.0, 2.0));
     }
 
     #[test]
     fn test_scalar_multiplication() {
-        let a = Vec2f::new(1.0, -2.0);
-        assert_eq!(a * 3.5, Vec2f::new(3.5, -7.0));
+        let a = Vec2f::from_parts(1.0, -2.0);
+        assert_eq!(a * 3.5, Vec2f::from_parts(3.5, -7.0));
 
-        let b = Vec2f::new(1.0, -2.0);
-        assert_eq!(b * 0.5, Vec2f::new(0.5, -1.0));
+        let b = Vec2f::from_parts(1.0, -2.0);
+        assert_eq!(b * 0.5, Vec2f::from_parts(0.5, -1.0));
     }
 
     #[test]
     fn test_scalar_division() {
-        let a = Vec2f::new(1.0, -2.0);
-        assert_eq!(a / 2.0, Vec2f::new(0.5, -1.0));
+        let a = Vec2f::from_parts(1.0, -2.0);
+        assert_eq!(a / 2.0, Vec2f::from_parts(0.5, -1.0));
     }
 
     #[test]
     fn test_magnitude() {
-        assert_eq!(Vec2f::new(0.0, 0.0).magnitude(), 0.0);
-        assert_eq!(Vec2f::new(1.0, 0.0).magnitude(), 1.0);
-        assert_eq!(Vec2f::new(0.0, 1.0).magnitude(), 1.0);
-        assert_eq!(Vec2f::new(1.0, 2.0).magnitude(), 5.0f32.sqrt());
-        assert_eq!(Vec2f::new(-1.0, -2.0).magnitude(), 5.0f32.sqrt());
+        assert_eq!(Vec2f::from_parts(0.0, 0.0).magnitude(), 0.0);
+        assert_eq!(Vec2f::from_parts(1.0, 0.0).magnitude(), 1.0);
+        assert_eq!(Vec2f::from_parts(0.0, 1.0).magnitude(), 1.0);
+        assert_eq!(Vec2f::from_parts(1.0, 2.0).magnitude(), 5.0f32.sqrt());
+        assert_eq!(Vec2f::from_parts(-1.0, -2.0).magnitude(), 5.0f32.sqrt());
     }
 
     #[test]
     fn test_normalization() {
-        assert_eq!(Vec2f::new(4.0, 0.0).normalize(), Vec2f::new(1.0, 0.0));
-        assert_eq!(Vec2f::new(1.0, 2.0).normalize(), Vec2f::new(0.4472135955, 0.894427191));
-        assert_approx_eq!(Vec2f::new(1.0, 2.0).normalize().magnitude(), 1.0);
+        assert_eq!(Vec2f::from_parts(4.0, 0.0).normalize(), Vec2f::from_parts(1.0, 0.0));
+        assert_eq!(Vec2f::from_parts(1.0, 2.0).normalize(), Vec2f::from_parts(0.4472135955, 0.894427191));
+        assert_approx_eq!(Vec2f::from_parts(1.0, 2.0).normalize().magnitude(), 1.0);
     }
 
     #[test]
     fn test_dot_product() {
-        let a = Vec2f::new(1.0, 2.0);
-        let b = Vec2f::new(2.0, 3.0);
+        let a = Vec2f::from_parts(1.0, 2.0);
+        let b = Vec2f::from_parts(2.0, 3.0);
         assert_approx_eq!(a.dot(b), 8.0)
     }
 }

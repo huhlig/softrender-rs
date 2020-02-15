@@ -14,8 +14,11 @@
 // limitations under the License.
 //
 use std::{fmt, ops};
-use super::{Mat3f, Vec3f, Vec4f};
+use super::{Vec3f, Vec4f};
 
+///
+/// 4x4 Matrix
+///
 #[derive(Copy, Clone, PartialEq)]
 pub struct Mat4f {
     pub m00: f32,
@@ -37,7 +40,67 @@ pub struct Mat4f {
 }
 
 impl Mat4f {
-    pub fn from_array(data: [[f32; 4]; 4]) -> Mat4f {
+    /// Create 4x4 Matrix from an array of column arrays.
+    ///
+    /// ```
+    /// use render::math::Mat4f;
+    ///
+    /// let m = Mat4f::from_array_cols(
+    ///     [
+    ///         [1.0, 2.0, 3.0],
+    ///         [4.0, 5.0, 6.0],
+    ///         [4.0, 5.0, 6.0],
+    ///     ]
+    /// );
+    /// ```
+    ///
+    ///                       0  1  2  3
+    /// ( a, e, i, m )    0 | a, b, c, d |
+    /// ( b, f, j, n )    1 | e, f, g, h |
+    /// ( c, g, k, o )    2 | i, j, k, l |
+    /// ( d, h, l, p )  = 3 | m, n, o, p |
+    ///
+    pub fn from_array_cols(data: [[f32; 4]; 4]) -> Mat4f {
+        Mat4f {
+            m00: data[0][0],
+            m01: data[1][0],
+            m02: data[2][0],
+            m03: data[3][0],
+            m10: data[0][1],
+            m11: data[1][1],
+            m12: data[2][1],
+            m13: data[3][1],
+            m20: data[0][2],
+            m21: data[1][2],
+            m22: data[2][2],
+            m23: data[3][2],
+            m30: data[0][3],
+            m31: data[1][3],
+            m32: data[2][3],
+            m33: data[3][3],
+        }
+    }
+    /// Create 4x4 Matrix from an array of row arrays.
+    ///
+    /// ```
+    /// use softrender::math::Mat3f;
+    ///
+    /// let m = Mat3f::from_array_cols(
+    ///     [
+    ///         [1.0, 2.0, 3.0],
+    ///         [4.0, 5.0, 6.0],
+    ///         [4.0, 5.0, 6.0],
+    ///     ]
+    /// );
+    /// ```
+    ///
+    ///                       0  1  2  3
+    /// ( a, e, i, m )    0 | a, b, c, d |
+    /// ( b, f, j, n )    1 | e, f, g, h |
+    /// ( c, g, k, o )    2 | i, j, k, l |
+    /// ( d, h, l, p )  = 3 | m, n, o, p |
+    ///
+    pub fn from_array_rows(data: [[f32; 4]; 4]) -> Mat4f {
         Mat4f {
             m00: data[0][0],
             m01: data[0][1],
@@ -97,10 +160,26 @@ impl Mat4f {
             m33: self.m33,
         }
     }
-    pub fn submatrix(&self, row: u8, column: u8) -> Mat3f {
-        Mat3f::identity()
+    pub fn determinant(&self) -> f32 {
+        let b00 = self.m00 * self.m11 - self.m01 * self.m10;
+        let b01 = self.m00 * self.m12 - self.m02 * self.m10;
+        let b02 = self.m00 * self.m13 - self.m03 * self.m10;
+        let b03 = self.m01 * self.m12 - self.m02 * self.m11;
+        let b04 = self.m01 * self.m13 - self.m03 * self.m11;
+        let b05 = self.m02 * self.m13 - self.m03 * self.m12;
+        let b06 = self.m20 * self.m31 - self.m21 * self.m30;
+        let b07 = self.m20 * self.m32 - self.m22 * self.m30;
+        let b08 = self.m20 * self.m33 - self.m23 * self.m30;
+        let b09 = self.m21 * self.m32 - self.m22 * self.m31;
+        let b10 = self.m21 * self.m33 - self.m23 * self.m31;
+        let b11 = self.m22 * self.m33 - self.m23 * self.m32;
+
+        b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06
     }
-    pub fn perspective(fov_deg: f32, aspect_ratio: f32, near: f32, far: f32) -> Mat4f {
+    pub fn invert(&self) -> Option<Self> {
+        unimplemented!()
+    }
+    pub fn perspective(fov_deg: f32, aspect_ratio: f32, near: f32, far: f32) -> Self {
         let fov_rad = 1.0 / (fov_deg * 0.5 / 180.0 * std::f32::consts::PI).tan();
         Mat4f {
             m00: aspect_ratio * fov_rad,
@@ -121,13 +200,13 @@ impl Mat4f {
             m33: 0.0,
         }
     }
-    pub fn look_at(eye: Vec3f, target: Vec3f, up: Vec3f) -> Mat4f {
+    pub fn look_at(eye: Vec3f, target: Vec3f, up: Vec3f) -> Self {
         let zaxis = (eye - target).normalize(); // The "forward" vector.
         let xaxis = Vec3f::cross(up, zaxis).normalize(); // The "right" vector.
         let yaxis = Vec3f::cross(zaxis, xaxis); // The "up" vector.
 
         // Create a 4x4 view matrix from the right, up, forward and eye position vectors
-        Mat4f::from_array([
+        Mat4f::from_rows([
             [xaxis.x, yaxis.x, zaxis.x, 0.0],
             [xaxis.y, yaxis.y, zaxis.y, 0.0],
             [xaxis.z, yaxis.z, zaxis.z, 0.0],
@@ -241,6 +320,8 @@ impl ops::Mul<Vec4f> for Mat4f {
 impl ops::Sub<Self> for Mat4f {
     type Output = Self;
 
+    /// Subtract one Mat4f from another.
+    ///
     ///     0  1  2  3       0  1  2  3           0      1      2      3
     /// 0 | A, B, C, D |   | a, b, c, d |   | A - a, B - b, C - c, D - d |
     /// 1 | E, F, G, H | - | e, f, g, h | = | E - e, F - f, G - g, H - h |
@@ -276,12 +357,12 @@ impl ops::SubAssign<Self> for Mat4f {
 
 #[cfg(test)]
 mod tests {
-    use super::{Mat3f, Mat4f, Vec3f, Vec4f};
+    use super::{Mat4f, Vec3f, Vec4f};
     use assert_approx_eq::assert_approx_eq;
 
     #[test]
-    fn test_creation() {
-        let m = Mat4f::from_array(
+    fn test_from_rows() {
+        let m = Mat4f::from_rows(
             [
                 [1.0, 2.0, 3.0, 4.0],
                 [5.5, 6.5, 7.5, 8.5],
@@ -300,7 +381,7 @@ mod tests {
 
     #[test]
     fn test_transpose() {
-        let a = Mat4f::from_array(
+        let a = Mat4f::from_rows(
             [
                 [00.0, 01.0, 02.0, 03.0],
                 [07.0, 06.0, 05.0, 04.0],
@@ -308,7 +389,7 @@ mod tests {
                 [15.0, 14.0, 13.0, 12.0],
             ]
         );
-        let b = Mat4f::from_array(
+        let b = Mat4f::from_rows(
             [
                 [00.0, 07.0, 08.0, 15.0],
                 [01.0, 06.0, 09.0, 14.0],
@@ -320,53 +401,73 @@ mod tests {
     }
 
     #[test]
-    fn test_submatrix() {
-        let a = Mat4f::from_array(
+    fn test_determinant() {
+        let a = Mat4f::from_rows(
             [
-                [-6.0, 01.0, 01.0, 06.0],
-                [-8.0, 05.0, 08.0, 06.0],
-                [-1.0, 00.0, 08.0, 02.0],
-                [-7.0, 01.0, -1.0, 01.0],
+                [1.0, 2.0, 3.0, 4.0],
+                [2.0, 1.0, 2.0, 3.0],
+                [3.0, 2.0, 1.0, 2.0],
+                [4.0, 3.0, 2.0, 1.0],
             ]
         );
-        let b = Mat3f::from_array(
+        assert_eq!(a.determinant(), -20.0);
+    }
+
+    #[test]
+    fn test_invert() {
+        let a = Mat4f::from_rows(
             [
-                [-6.0, 01.0, 06.0],
-                [-8.0, 05.0, 06.0],
-                [-7.0, 01.0, 01.0],
+                [1.0, 2.0, 3.0, 4.0],
+                [2.0, 1.0, 2.0, 3.0],
+                [3.0, 2.0, 1.0, 2.0],
+                [4.0, 3.0, 2.0, 1.0],
             ]
         );
-        assert_eq!(a.submatrix(2, 1), b);
+        let b = Mat4f::from_rows(
+            [
+                [-0.4, 00.5, 00.0, 00.1],
+                [00.5, -1.0, 00.5, 00.0],
+                [00.0, 00.5, -1.0, 00.5],
+                [00.1, 00.0, 00.5, -0.4],
+            ]
+        );
+        assert_eq!(a.invert().unwrap(), b);
     }
 
     #[test]
     fn test_lookat() {
-        let eye = Vec3f::new(0.0, 0.0, 0.0);
-        let target = Vec3f(1.0, 1.0, 1.0);
-        let up = Vec3f::new(0.0, 0.0, 1.0);
+        let eye = Vec3f::from_parts(0.0, 0.0, 0.0);
+        let target = Vec3f::from_parts(1.0, 1.0, 1.0);
+        let up = Vec3f::from_parts(0.0, 0.0, 1.0);
         let a = Mat4f::look_at(eye, target, up);
-        unimplemented!("Not yet written")
-    }
-
-    #[test]
-    fn test_lookat() {
-        let fov = 90.0;
-        let aspect_ratio = 90.0;
-        let near = 0.0001;
-        let far = 1.0000;
-        let a = Mat4f::perspective(fov, aspect_ratio, near, far);
-        let b = Mat4f::from_array([
+        let b = Mat4f::from_rows([
             [-6.0, 01.0, 01.0, 06.0],
             [-8.0, 05.0, 08.0, 06.0],
             [-1.0, 00.0, 08.0, 02.0],
             [-7.0, 01.0, -1.0, 01.0],
         ]);
-        unimplemented!("Not yet written")
+        assert_eq!(a, b)
+    }
+
+    #[test]
+    fn test_perspective() {
+        let fov = 90.0;
+        let aspect_ratio = 90.0;
+        let near = 0.0001;
+        let far = 1.0000;
+        let a = Mat4f::perspective(fov, aspect_ratio, near, far);
+        let b = Mat4f::from_array_rows([
+            [01.810660, 00.000000, 00.000000, 00.000000],
+            [00.000000, 02.414213, 00.000000, 00.000000],
+            [00.000000, 00.000000, -1.002002, -1.000000],
+            [00.000000, 00.000000, -0.200200, 00.000000],
+        ]);
+        assert_eq!(a, b)
     }
 
     #[test]
     fn test_partialeq() {
-        let a = Mat4f::from_array(
+        let a = Mat4f::from_rows(
             [
                 [1.0, 2.0, 3.0, 4.0],
                 [5.5, 6.5, 7.5, 8.5],
@@ -374,7 +475,7 @@ mod tests {
                 [13.5, 14.5, 15.5, 16.5],
             ]
         );
-        let b = Mat4f::from_array(
+        let b = Mat4f::from_rows(
             [
                 [1.0, 2.0, 3.0, 4.0],
                 [5.5, 6.5, 7.5, 8.5],
@@ -382,7 +483,7 @@ mod tests {
                 [13.5, 14.5, 15.5, 16.5],
             ]
         );
-        let c = Mat4f::from_array(
+        let c = Mat4f::from_rows(
             [
                 [13.5, 14.5, 15.5, 16.5],
                 [9.0, 10.0, 11.0, 12.0],
@@ -396,7 +497,7 @@ mod tests {
 
     #[test]
     fn test_add_mat4f() {
-        let a = Mat4f::from_array(
+        let a = Mat4f::from_rows(
             [
                 [1.0, 2.0, 3.0, 4.0],
                 [4.0, 3.0, 2.0, 1.0],
@@ -404,7 +505,7 @@ mod tests {
                 [4.0, 3.0, 2.0, 1.0],
             ]
         );
-        let b = Mat4f::from_array(
+        let b = Mat4f::from_rows(
             [
                 [5.0, 6.0, 7.0, 8.0],
                 [8.0, 7.0, 6.0, 5.0],
@@ -412,7 +513,7 @@ mod tests {
                 [8.0, 7.0, 6.0, 5.0],
             ]
         );
-        let c = Mat4f::from_array(
+        let c = Mat4f::from_rows(
             [
                 [6.0, 8.0, 10.0, 12.0],
                 [12.0, 10.0, 8.0, 6.0],
@@ -425,7 +526,7 @@ mod tests {
 
     #[test]
     fn test_addassign_mat4f() {
-        let mut a = Mat4f::from_array(
+        let mut a = Mat4f::from_rows(
             [
                 [1.0, 2.0, 3.0, 4.0],
                 [4.0, 3.0, 2.0, 1.0],
@@ -433,7 +534,7 @@ mod tests {
                 [4.0, 3.0, 2.0, 1.0],
             ]
         );
-        a += Mat4f::from_array(
+        a += Mat4f::from_rows(
             [
                 [5.0, 6.0, 7.0, 8.0],
                 [8.0, 7.0, 6.0, 5.0],
@@ -441,7 +542,7 @@ mod tests {
                 [8.0, 7.0, 6.0, 5.0],
             ]
         );
-        let c = Mat4f::from_array(
+        let c = Mat4f::from_rows(
             [
                 [6.0, 8.0, 10.0, 12.0],
                 [12.0, 10.0, 8.0, 6.0],
@@ -454,7 +555,7 @@ mod tests {
 
     #[test]
     fn test_mul_mat4f() {
-        let a = Mat4f::from_array(
+        let a = Mat4f::from_rows(
             [
                 [1.0, 2.0, 3.0, 4.0],
                 [4.0, 3.0, 2.0, 1.0],
@@ -462,7 +563,7 @@ mod tests {
                 [4.0, 3.0, 2.0, 1.0],
             ]
         );
-        let b = Mat4f::from_array(
+        let b = Mat4f::from_rows(
             [
                 [4.0, 3.0, 2.0, 1.0],
                 [1.0, 2.0, 3.0, 4.0],
@@ -470,7 +571,7 @@ mod tests {
                 [1.0, 2.0, 3.0, 4.0],
             ]
         );
-        let c = Mat4f::from_array(
+        let c = Mat4f::from_rows(
             [
                 [22.0, 24.0, 26.0, 28.0],
                 [28.0, 26.0, 24.0, 22.0],
@@ -483,7 +584,7 @@ mod tests {
 
     #[test]
     fn test_mulassign_mat4f() {
-        let mut a = Mat4f::from_array(
+        let mut a = Mat4f::from_rows(
             [
                 [1.0, 2.0, 3.0, 4.0],
                 [4.0, 3.0, 2.0, 1.0],
@@ -491,7 +592,7 @@ mod tests {
                 [4.0, 3.0, 2.0, 1.0],
             ]
         );
-        a *= Mat4f::from_array(
+        a *= Mat4f::from_rows(
             [
                 [4.0, 3.0, 2.0, 1.0],
                 [1.0, 2.0, 3.0, 4.0],
@@ -499,7 +600,7 @@ mod tests {
                 [1.0, 2.0, 3.0, 4.0],
             ]
         );
-        let c = Mat4f::from_array(
+        let c = Mat4f::from_rows(
             [
                 [22.0, 24.0, 26.0, 28.0],
                 [28.0, 26.0, 24.0, 22.0],
@@ -512,7 +613,7 @@ mod tests {
 
     #[test]
     fn test_mul_vec4f() {
-        let a = Mat4f::from_array(
+        let a = Mat4f::from_rows(
             [
                 [0.0, 1.0, 2.0, 3.0],
                 [7.0, 6.0, 5.0, 4.0],
@@ -520,14 +621,14 @@ mod tests {
                 [3.0, 4.0, 5.0, 6.0],
             ]
         );
-        let b = Vec4f::new(2.0, 1.0, 0.0, 1.0);
-        let c = Vec4f::new(4.0, 24.0, 32.0, 16.0);
+        let b = Vec4f::from_parts(2.0, 1.0, 0.0, 1.0);
+        let c = Vec4f::from_parts(4.0, 24.0, 32.0, 16.0);
         assert_eq!(a * b, c);
     }
 
     #[test]
     fn test_sub_mat4f() {
-        let a = Mat4f::from_array(
+        let a = Mat4f::from_rows(
             [
                 [1.0, 2.0, 3.0, 4.0],
                 [4.0, 3.0, 2.0, 1.0],
@@ -535,7 +636,7 @@ mod tests {
                 [4.0, 3.0, 2.0, 1.0],
             ]
         );
-        let b = Mat4f::from_array(
+        let b = Mat4f::from_rows(
             [
                 [5.0, 6.0, 7.0, 8.0],
                 [8.0, 7.0, 6.0, 5.0],
@@ -543,7 +644,7 @@ mod tests {
                 [8.0, 7.0, 6.0, 5.0],
             ]
         );
-        let c = Mat4f::from_array(
+        let c = Mat4f::from_rows(
             [
                 [-4.0, -4.0, -4.0, -4.0],
                 [-4.0, -4.0, -4.0, -4.0],
@@ -556,7 +657,7 @@ mod tests {
 
     #[test]
     fn test_subassign_mat4f() {
-        let mut a = Mat4f::from_array(
+        let mut a = Mat4f::from_rows(
             [
                 [1.0, 2.0, 3.0, 4.0],
                 [4.0, 3.0, 2.0, 1.0],
@@ -564,7 +665,7 @@ mod tests {
                 [4.0, 3.0, 2.0, 1.0],
             ]
         );
-        a -= Mat4f::from_array(
+        a -= Mat4f::from_rows(
             [
                 [5.0, 6.0, 7.0, 8.0],
                 [8.0, 7.0, 6.0, 5.0],
@@ -572,7 +673,7 @@ mod tests {
                 [8.0, 7.0, 6.0, 5.0],
             ]
         );
-        let c = Mat4f::from_array(
+        let c = Mat4f::from_rows(
             [
                 [-4.0, -4.0, -4.0, -4.0],
                 [-4.0, -4.0, -4.0, -4.0],
