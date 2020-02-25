@@ -210,10 +210,10 @@ impl ops::Mul<Mat4f> for Vec3f {
     type Output = Self;
 
     fn mul(self, rhs: Mat4f) -> Self {
-        let x = self.x * rhs.m00 + self.y * rhs.m10 + self.z * rhs.m20 + rhs.m30;
-        let y = self.x * rhs.m01 + self.y * rhs.m11 + self.z * rhs.m21 + rhs.m31;
-        let z = self.x * rhs.m02 + self.y * rhs.m12 + self.z * rhs.m22 + rhs.m32;
-        let w = self.x * rhs.m03 + self.y * rhs.m13 + self.z * rhs.m23 + rhs.m33;
+        let x = self.x * rhs.c0r0 + self.y * rhs.c1r0 + self.z * rhs.c2r0 + rhs.c3r0;
+        let y = self.x * rhs.c0r1 + self.y * rhs.c1r1 + self.z * rhs.c2r1 + rhs.c3r1;
+        let z = self.x * rhs.c0r2 + self.y * rhs.c1r2 + self.z * rhs.c2r2 + rhs.c3r2;
+        let w = self.x * rhs.c0r3 + self.y * rhs.c1r3 + self.z * rhs.c2r3 + rhs.c3r3;
         if w != 0.0 {
             Self {
                 x: x / w,

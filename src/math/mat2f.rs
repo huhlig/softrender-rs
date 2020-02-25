@@ -18,24 +18,23 @@ use super::Vec2f;
 use std::{fmt, ops};
 
 ///
-/// A 2x2 Matrix of 32 bit floats.
+/// A Column Major 2x2 Matrix of 32 bit floats.
 ///
 #[derive(Copy, Clone, PartialEq)]
 pub struct Mat2f {
-    pub m00: f32,
-    pub m01: f32,
-    pub m10: f32,
-    pub m11: f32,
+    pub c0r0: f32,
+    pub c0r1: f32,
+    pub c1r0: f32,
+    pub c1r1: f32,
 }
 
 impl Mat2f {
     ///
-    /// Create 2x2 Matrix from an array of column arrays.
-    ///
+    /// Create Matrix from Rows
     /// ```
-    /// use render::math::Mat2f;
+    /// use softrender::math::Mat2f;
     ///
-    /// let m = Mat2f::from_array_cols(
+    /// let m = Mat2f::from_rows(
     ///     [
     ///         [1.0, 2.0],
     ///         [3.0, 4.0],
@@ -43,181 +42,72 @@ impl Mat2f {
     /// );
     /// ```
     ///
-    ///                          0  1
-    ///                      0 | a, b |
-    /// ( a, c ), ( b, d ) = 1 | c, d |
+    ///     x  y         0  1
+    /// 0 ( a, b )    | a, b | 0
+    /// 1 ( c, d )  = | c, d | 1
     ///
-    pub fn from_array_cols(data: [[f32; 2]; 2]) -> Self {
+    pub fn from_rows(rows: [[f32; 2]; 2]) -> Mat2f {
         Self {
-            m00: data[0][0],
-            m01: data[1][0],
-            m10: data[0][1],
-            m11: data[1][1],
+            c0r0: rows[0][0],
+            c1r0: rows[0][1],
+            c0r1: rows[1][0],
+            c1r1: rows[1][1],
         }
     }
 
     ///
-    /// Create 2x2 Matrix from an array of row arrays.
-    ///
+    /// Create Matrix from Columns
     /// ```
-    /// use render::math::Mat2f;
+    /// use softrender::math::Mat2f;
     ///
-    /// let m = Mat2f::from_array_rows(
+    /// let m = Mat2f::from_cols(
     ///     [
-    ///         [1.0, 2.0],
-    ///         [3.0, 4.0],
+    ///         [1.0, 3.0],
+    ///         [2.0, 4.0],
     ///     ]
     /// );
     /// ```
     ///
-    ///                          0  1
-    ///                      0 | a, b |
-    /// ( a, b ), ( c, d ) = 1 | c, d |
+    ///     x  y         0  1
+    /// 0 ( a, c )    | a, b | 0
+    /// 1 ( b, d )  = | c, d | 1
     ///
-    pub fn from_array_rows(data: [[f32; 2]; 2]) -> Self {
+    pub fn from_cols(cols: [[f32; 2]; 2]) -> Mat2f {
         Self {
-            m00: data[0][0],
-            m01: data[0][1],
-            m10: data[1][0],
-            m11: data[1][1],
+            c0r0: cols[0][0],
+            c0r1: cols[0][1],
+            c1r0: cols[1][0],
+            c1r1: cols[1][1],
         }
     }
 
     ///
-    /// Create 2x2 Matrix from an array of column vectors
+    /// Create a 2x2 Zero Matrix
     ///
     /// ```
-    /// use render::math::{Mat2f, Vec2f};
+    /// use softrender::math::Mat2f;
     ///
-    /// let m = Mat2f::from_vec2f_cols(
-    ///     [
-    ///         Vec2f::from_parts(1.0, 3.0),
-    ///         Vec2f::from_parts(2.0, 4.0),
-    ///     ]
-    /// );
+    /// let m = Mat2f::identity();
     /// ```
-    ///                               0   1
-    ///                          0 | x1, x2 |
-    /// ( x1, y1 ), ( x2, y2 ) = 1 | y1, y2 |
     ///
-    pub fn from_vec2f_cols(data: [Vec2f; 2]) -> Self {
+    ///       0    1
+    /// 0 | 0.0, 0.0 |
+    /// 1 | 0.0, 0.0 |
+    ///
+    pub fn zero() -> Self {
         Self {
-            m00: data[0].x,
-            m01: data[1].x,
-            m10: data[0].y,
-            m11: data[1].y,
+            c0r0: 1.0,
+            c0r1: 0.0,
+            c1r0: 0.0,
+            c1r1: 1.0,
         }
     }
 
     ///
-    /// Create 2x2 Matrix from an array of row vectors
+    /// Create a 2x2 Identity Matrix
     ///
     /// ```
-    /// use render::math::{Mat2f, Vec2f};
-    ///
-    /// let m = Mat2f::from_vec2f_rows(
-    ///     [
-    ///         Vec2f::from_parts(1.0, 2.0),
-    ///         Vec2f::from_parts(3.0, 4.0),
-    ///     ]
-    /// );
-    /// ```
-    ///                               0   1
-    ///                          0 | x1, y1 |
-    /// ( x1, y1 ), ( x2, y2 ) = 1 | x2, y2 |
-    ///
-    pub fn from_vec2f_rows(data: [Vec2f; 2]) -> Self {
-        Self {
-            m00: data[0].x,
-            m01: data[1].x,
-            m10: data[0].y,
-            m11: data[1].y,
-        }
-    }
-
-    ///
-    /// Create an array of row arrays from Matrix
-    ///
-    /// ```
-    /// use render::math::{Mat2f, Vec2f};
-    ///
-    /// let a = Mat2f::identity().to_array_rows();
-    /// ```
-    ///      0   1
-    /// 0 | x1, x2 |   ( x1, y1 )
-    /// 1 | y1, y2 | = ( x2, y2 )
-    ///
-    pub fn to_array_rows(&self) -> [[f32; 2]; 2] {
-        [
-            [self.m00, self.m01],
-            [self.m10, self.m11]
-        ]
-    }
-
-    ///
-    /// Create an array of column arrays from the Mat2f
-    ///
-    /// ```
-    /// use render::math::{Mat2f, Vec2f};
-    ///
-    /// let m = Mat2f::identity().to_array_cols();
-    /// ```
-    ///      0   1
-    /// 0 | x1, x2 |
-    /// 1 | y1, y2 | = ( x1, y1 ), ( x2, y2 )
-    ///
-    pub fn to_array_cols(&self) -> [[f32; 2]; 2] {
-        [
-            [self.m00, self.m10],
-            [self.m01, self.m11]
-        ]
-    }
-
-    ///
-    /// Create an array of Row Vectors
-    ///
-    /// ```
-    /// use render::math::{Mat2f, Vec2f};
-    ///
-    /// let m = Mat2f::identity().to_vec2f_rows();
-    /// ```
-    ///
-    ///      0   1
-    /// 0 | x1, y1 |   ( x1, y1 )
-    /// 1 | x2, y2 | = ( x2, y2 )
-    ///
-    pub fn to_vec2f_rows(&self) -> [Vec2f; 2] {
-        [
-            Vec2f::from_parts(self.m00, self.m01),
-            Vec2f::from_parts(self.m10, self.m11),
-        ]
-    }
-
-    ///
-    /// Create an array of Column Vectors
-    ///
-    /// ```
-    /// use render::math::{Mat2f, Vec2f};
-    ///
-    /// let m = Mat2f::identity().to_vec2f_cols();
-    /// ```
-    ///
-    ///      0   1
-    /// 0 | x1, y1 |   ( x1, y1 )
-    /// 1 | x2, y2 | = ( x2, y2 )
-    ///
-    pub fn to_vec2f_cols(&self) -> [Vec2f; 2] {
-        [
-            Vec2f::from_parts(self.m00, self.m10),
-            Vec2f::from_parts(self.m01, self.m11),
-        ]
-    }
-
-    ///
-    /// Create the 2x2 Identity Matrix
-    ///
-    /// ```
-    /// use render::math::{Mat2f, Vec2f};
+    /// use softrender::math::Mat2f;
     ///
     /// let m = Mat2f::identity();
     /// ```
@@ -228,17 +118,58 @@ impl Mat2f {
     ///
     pub fn identity() -> Self {
         Self {
-            m00: 1.0,
-            m01: 0.0,
-            m10: 0.0,
-            m11: 1.0,
+            c0r0: 1.0,
+            c0r1: 0.0,
+            c1r0: 0.0,
+            c1r1: 1.0,
         }
     }
+
+    ///
+    /// Get Rows
+    ///
+    /// ```
+    /// use softrender::math::Mat2f;
+    ///
+    /// let m = Mat2f::identity().to_rows();
+    /// ```
+    ///
+    ///     0  1          x  y
+    /// 0 | a, b |    0 ( a, b )
+    /// 1 | c, d | => 1 ( c, d )
+    ///
+    pub fn to_rows(&self) -> [[f32; 2]; 2] {
+        [
+            [self.c0r0, self.c1r0],
+            [self.c0r1, self.c1r1],
+        ]
+    }
+
+    ///
+    /// Get Columns
+    ///
+    /// ```
+    /// use softrender::math::Mat2f;
+    ///
+    /// let m = Mat2f::identity().to_cols();
+    /// ```
+    ///
+    ///     0  1          x  y
+    /// 0 | a, b |    0 ( a, c )
+    /// 1 | c, d | => 1 ( b, d )
+    ///
+    pub fn to_cols(&self) -> [[f32; 2]; 2] {
+        [
+            [self.c0r0, self.c0r1],
+            [self.c1r0, self.c1r1],
+        ]
+    }
+
     ///
     /// Calculate the transpose of this matrix
     ///
     /// ```
-    /// use render::math::{Mat2f, Vec2f};
+    /// use softrender::math::Mat2f;
     ///
     /// let m = Mat2f::identity().transpose();
     /// ```
@@ -249,17 +180,18 @@ impl Mat2f {
     ///
     pub fn transpose(&self) -> Self {
         Self {
-            m00: self.m00,
-            m01: self.m10,
-            m10: self.m01,
-            m11: self.m11,
+            c0r0: self.c0r0,
+            c0r1: self.c1r0,
+            c1r0: self.c0r1,
+            c1r1: self.c1r1,
         }
     }
+
     ///
     /// Calculate the determinant of this Matrix
     ///
     /// ```
-    /// use render::math::{Mat2f, Vec2f};
+    /// use softrender::math::Mat2f;
     ///
     /// let m = Mat2f::identity().determinant();
     /// ```
@@ -269,13 +201,13 @@ impl Mat2f {
     /// 1 | C, D | = AD - BC
     ///
     pub fn determinant(&self) -> f32 {
-        (self.m00 * self.m11) - (self.m01 * self.m10)
+        (self.c0r0 * self.c1r1) - (self.c0r1 * self.c1r0)
     }
 
     /// Calculate the inverse of this Matrix
     ///
     /// ```
-    /// use render::math::{Mat2f, Vec2f};
+    /// use softrender::math::Mat2f;
     ///
     /// let m = Mat2f::identity().invert();
     /// ```
@@ -287,10 +219,8 @@ impl Mat2f {
     pub fn invert(&self) -> Self {
         let det = self.determinant();
         Self {
-            m00: self.m11 / det,
-            m01: self.m01 / det,
-            m10: self.m10 / det,
-            m11: self.m00 / det,
+            c0r0: -self.c1r1 / det, c1r0:  self.c1r0 / det,
+            c0r1:  self.c0r1 / det, c1r1: -self.c0r0 / det,
         }
     }
 }
@@ -304,8 +234,8 @@ impl Default for Mat2f {
 impl fmt::Debug for Mat2f {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "\n[ {}, {} ]\n[ {}, {} ]\n",
-               self.m00, self.m01,
-               self.m10, self.m11,
+               self.c0r0, self.c1r0,
+               self.c0r1, self.c1r1,
         )
     }
 }
@@ -318,10 +248,10 @@ impl ops::Add<Self> for Mat2f {
     /// 1 | C, D | + | c, D | = | C + c, D + d |
     fn add(self, rhs: Self) -> Self {
         Self {
-            m00: self.m00 + rhs.m00,
-            m01: self.m01 + rhs.m01,
-            m10: self.m10 + rhs.m10,
-            m11: self.m11 + rhs.m11,
+            c0r0: self.c0r0 + rhs.c0r0,
+            c0r1: self.c0r1 + rhs.c0r1,
+            c1r0: self.c1r0 + rhs.c1r0,
+            c1r1: self.c1r1 + rhs.c1r1,
         }
     }
 }
@@ -340,10 +270,10 @@ impl ops::Mul<Self> for Mat2f {
     /// 1 | C, D | x | c, d | = | Ca + Dc, Cb + Dd |
     fn mul(self, rhs: Self) -> Self {
         Self {
-            m00: (self.m00 * rhs.m00) + (self.m01 * rhs.m10),
-            m01: (self.m00 * rhs.m01) + (self.m01 * rhs.m11),
-            m10: (self.m10 * rhs.m00) + (self.m11 * rhs.m10),
-            m11: (self.m10 * rhs.m01) + (self.m11 * rhs.m11),
+            c0r0: (self.c0r0 * rhs.c0r0) + (self.c0r1 * rhs.c1r0),
+            c0r1: (self.c0r0 * rhs.c0r1) + (self.c0r1 * rhs.c1r1),
+            c1r0: (self.c1r0 * rhs.c0r0) + (self.c1r1 * rhs.c1r0),
+            c1r1: (self.c1r0 * rhs.c0r1) + (self.c1r1 * rhs.c1r1),
         }
     }
 }
@@ -362,8 +292,8 @@ impl ops::Mul<Vec2f> for Mat2f {
     /// 1 | C, D | x | y | = | Cx + Dy |
     fn mul(self, rhs: Vec2f) -> Vec2f {
         Vec2f {
-            x: (self.m00 * rhs.x) + (self.m01 * rhs.y),
-            y: (self.m10 * rhs.x) + (self.m11 * rhs.y),
+            x: (self.c0r0 * rhs.x) + (self.c0r1 * rhs.y),
+            y: (self.c1r0 * rhs.x) + (self.c1r1 * rhs.y),
         }
     }
 }
@@ -376,10 +306,10 @@ impl ops::Sub<Self> for Mat2f {
     /// 1 | C, D | - | c, d | = | C - c, D - d |
     fn sub(self, rhs: Self) -> Self {
         Self {
-            m00: self.m00 - rhs.m00,
-            m01: self.m01 - rhs.m01,
-            m10: self.m10 - rhs.m10,
-            m11: self.m11 - rhs.m11,
+            c0r0: self.c0r0 - rhs.c0r0,
+            c0r1: self.c0r1 - rhs.c0r1,
+            c1r0: self.c1r0 - rhs.c1r0,
+            c1r1: self.c1r1 - rhs.c1r1,
         }
     }
 }
@@ -397,27 +327,85 @@ mod tests {
 
     #[test]
     fn test_from_rows() {
-        let m = Mat2f::from_array_rows(
+        let m = Mat2f::from_rows(
             [
-                [-3.0, 5.0],
-                [1.0, -2.0],
+                [-1.0, 2.0],
+                [-3.0, 4.0],
             ]
         );
-        assert_approx_eq!(m.m00, -3.0);
-        assert_approx_eq!(m.m01, 5.0);
-        assert_approx_eq!(m.m10, 1.0);
-        assert_approx_eq!(m.m11, -2.0);
+        assert_approx_eq!(m.c0r0, -1.0);
+        assert_approx_eq!(m.c1r0, 2.0);
+        assert_approx_eq!(m.c0r1, -3.0);
+        assert_approx_eq!(m.c1r1, 4.0);
+    }
+
+    #[test]
+    fn test_from_cols() {
+        let m = Mat2f::from_cols(
+            [
+                [-1.0, 3.0],
+                [-2.0, 4.0],
+            ]
+        );
+        assert_approx_eq!(m.c0r0, -1.0);
+        assert_approx_eq!(m.c0r1, 3.0);
+        assert_approx_eq!(m.c1r0, -2.0);
+        assert_approx_eq!(m.c1r1, 4.0);
+    }
+
+    #[test]
+    fn test_zero() {
+        let m = Mat2f::zero();
+
+        assert_approx_eq!(m.c0r0, 0.0);
+        assert_approx_eq!(m.c0r1, 0.0);
+        assert_approx_eq!(m.c1r0, 0.0);
+        assert_approx_eq!(m.c1r1, 0.0);
+    }
+
+    #[test]
+    fn test_identity() {
+        let m = Mat2f::identity();
+
+        assert_approx_eq!(m.c0r0, 1.0);
+        assert_approx_eq!(m.c0r1, 0.0);
+        assert_approx_eq!(m.c1r0, 0.0);
+        assert_approx_eq!(m.c1r1, 1.0);
+    }
+
+    #[test]
+    fn test_to_rows() {
+        let a = [
+            [-1.0, 2.0],
+            [-3.0, 4.0],
+        ];
+        let m = Mat2f::from_rows(a.clone());
+        let b = m.to_rows();
+
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn test_to_cols() {
+        let a = [
+            [-1.0, 2.0],
+            [-3.0, 4.0],
+        ];
+        let m = Mat2f::from_cols(a.clone());
+        let b = m.to_cols();
+
+        assert_eq!(a, b);
     }
 
     #[test]
     fn test_transpose() {
-        let a = Mat2f::from_array_rows(
+        let a = Mat2f::from_rows(
             [
                 [1.0, 2.0],
                 [3.0, 4.0],
             ]
         );
-        let b = Mat2f::from_array_rows(
+        let b = Mat2f::from_rows(
             [
                 [1.0, 3.0],
                 [2.0, 4.0],
@@ -428,7 +416,7 @@ mod tests {
 
     #[test]
     fn test_determinant() {
-        let a = Mat2f::from_array_rows(
+        let a = Mat2f::from_rows(
             [
                 [1.0, 2.0],
                 [3.0, 4.0],
@@ -439,30 +427,35 @@ mod tests {
 
     #[test]
     fn test_invert() {
-        let a = Mat2f::from_array_rows(
+        let a = Mat2f::from_rows(
             [
                 [1.0, 2.0],
                 [3.0, 4.0],
             ]
         );
-        let b = Mat2f::from_array_rows(
+        let b = Mat2f::from_rows(
             [
-                [-2.0, 1.0],
-                [1.5, -0.5],
+                [-2.0,  1.0],
+                [ 1.5, -0.5],
             ]
         );
         assert_eq!(a.invert(), b)
     }
 
     #[test]
+    fn test_default() {
+        assert_eq!(Mat2f::default(), Mat2f::default());
+    }
+
+    #[test]
     fn test_partialeq() {
-        let a = Mat2f::from_array_rows(
+        let a = Mat2f::from_rows(
             [
                 [1.0 + 1.0, 2.0 + 2.0],
                 [1.5 - 0.5, 3.0],
             ]
         );
-        let b = Mat2f::from_array_rows(
+        let b = Mat2f::from_rows(
             [
                 [2.0, 4.0],
                 [1.0, 1.5 + 1.5],
@@ -473,19 +466,19 @@ mod tests {
 
     #[test]
     fn test_add_mat2f() {
-        let a = Mat2f::from_array_rows(
+        let a = Mat2f::from_rows(
             [
                 [1.0, 2.0],
                 [4.0, 3.0],
             ]
         );
-        let b = Mat2f::from_array_rows(
+        let b = Mat2f::from_rows(
             [
                 [4.0, 3.0],
                 [1.0, 2.0],
             ]
         );
-        let c = Mat2f::from_array_rows(
+        let c = Mat2f::from_rows(
             [
                 [5.0, 5.0],
                 [5.0, 5.0],
@@ -496,19 +489,19 @@ mod tests {
 
     #[test]
     fn test_addassign_mat2f() {
-        let mut a = Mat2f::from_array_rows(
+        let mut a = Mat2f::from_rows(
             [
                 [1.0, 2.0],
                 [4.0, 3.0],
             ]
         );
-        a += Mat2f::from_array_rows(
+        a += Mat2f::from_rows(
             [
                 [4.0, 3.0],
                 [1.0, 2.0],
             ]
         );
-        let c = Mat2f::from_array_rows(
+        let c = Mat2f::from_rows(
             [
                 [5.0, 5.0],
                 [5.0, 5.0],
@@ -519,19 +512,19 @@ mod tests {
 
     #[test]
     fn test_mul_mat2f() {
-        let a = Mat2f::from_array_rows(
+        let a = Mat2f::from_rows(
             [
                 [1.0, 2.0],
                 [4.0, 3.0],
             ]
         );
-        let b = Mat2f::from_array_rows(
+        let b = Mat2f::from_rows(
             [
                 [4.0, 3.0],
                 [1.0, 2.0],
             ]
         );
-        let c = Mat2f::from_array_rows(
+        let c = Mat2f::from_rows(
             [
                 [6.0, 7.0],
                 [19.0, 18.0],
@@ -542,19 +535,19 @@ mod tests {
 
     #[test]
     fn test_mulassign_mat2f() {
-        let mut a = Mat2f::from_array_rows(
+        let mut a = Mat2f::from_rows(
             [
                 [1.0, 2.0],
                 [4.0, 3.0],
             ]
         );
-        a *= Mat2f::from_array_rows(
+        a *= Mat2f::from_rows(
             [
                 [4.0, 3.0],
                 [1.0, 2.0],
             ]
         );
-        let c = Mat2f::from_array_rows(
+        let c = Mat2f::from_rows(
             [
                 [6.0, 7.0],
                 [19.0, 18.0],
@@ -565,7 +558,7 @@ mod tests {
 
     #[test]
     fn test_mul_vec2f() {
-        let a = Mat2f::from_array_rows(
+        let a = Mat2f::from_rows(
             [
                 [1.0, 2.0],
                 [3.0, 4.0],
@@ -578,19 +571,19 @@ mod tests {
 
     #[test]
     fn test_sub_mat2f() {
-        let a = Mat2f::from_array_rows(
+        let a = Mat2f::from_rows(
             [
                 [1.0, 2.0],
                 [4.0, 3.0],
             ]
         );
-        let b = Mat2f::from_array_rows(
+        let b = Mat2f::from_rows(
             [
                 [4.0, 3.0],
                 [1.0, 2.0],
             ]
         );
-        let c = Mat2f::from_array_rows(
+        let c = Mat2f::from_rows(
             [
                 [-3.0, -1.0],
                 [3.0, 1.0],
@@ -601,19 +594,19 @@ mod tests {
 
     #[test]
     fn test_subassign_mat2f() {
-        let mut a = Mat2f::from_array_rows(
+        let mut a = Mat2f::from_rows(
             [
                 [1.0, 2.0],
                 [4.0, 3.0],
             ]
         );
-        a -= Mat2f::from_array_rows(
+        a -= Mat2f::from_rows(
             [
                 [4.0, 3.0],
                 [1.0, 2.0],
             ]
         );
-        let c = Mat2f::from_array_rows(
+        let c = Mat2f::from_rows(
             [
                 [-3.0, -1.0],
                 [3.0, 1.0],

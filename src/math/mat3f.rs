@@ -21,24 +21,25 @@ use std::{fmt, ops};
 ///
 #[derive(Copy, Clone, PartialEq)]
 pub struct Mat3f {
-    pub m00: f32,
-    pub m01: f32,
-    pub m02: f32,
-    pub m10: f32,
-    pub m11: f32,
-    pub m12: f32,
-    pub m20: f32,
-    pub m21: f32,
-    pub m22: f32,
+    pub c0r0: f32,
+    pub c0r1: f32,
+    pub c0r2: f32,
+    pub c1r0: f32,
+    pub c1r1: f32,
+    pub c1r2: f32,
+    pub c2r0: f32,
+    pub c2r1: f32,
+    pub c2r2: f32,
 }
 
 impl Mat3f {
+    ///
     /// Create 3x3 Matrix from an array of column arrays.
     ///
     /// ```
     /// use softrender::math::Mat3f;
     ///
-    /// let m = Mat3f::from_array_cols(
+    /// let m = Mat3f::from_cols(
     ///     [
     ///         [1.0, 2.0, 3.0],
     ///         [4.0, 5.0, 6.0],
@@ -47,103 +48,223 @@ impl Mat3f {
     /// );
     /// ```
     ///
-    ///               0  1
-    /// ( a, c )    | a, b | 0
-    /// ( b, d )  = | c, d | 1
-    pub fn from_array_cols(data: [[f32; 3]; 3]) -> Mat3f {
-        // (a, d, g)    | a, b, c |
-        // (b, e, h)    | d, e, f |
-        // (c, f, i)    | g, h, i |
+    ///     x  y  z          0  1  2
+    /// 0 ( a, d, g )    0 | a, b, c |
+    /// 1 ( b, e, h )    1 | d, e, f |
+    /// 2 ( c, f, i ) -> 2 | g, h, i |
+    ///
+    pub fn from_cols(cols: [[f32; 3]; 3]) -> Mat3f {
         Mat3f {
-            m00: data[0][0],
-            m01: data[1][0],
-            m02: data[2][0],
-            m10: data[0][1],
-            m11: data[1][1],
-            m12: data[2][1],
-            m20: data[0][2],
-            m21: data[1][2],
-            m22: data[2][2],
+            c0r0: cols[0][0],
+            c0r1: cols[1][0],
+            c0r2: cols[2][0],
+            c1r0: cols[0][1],
+            c1r1: cols[1][1],
+            c1r2: cols[2][1],
+            c2r0: cols[0][2],
+            c2r1: cols[1][2],
+            c2r2: cols[2][2],
         }
     }
-    pub fn from_array_rows(data: [[f32; 3]; 3]) -> Mat3f {
-        // (a, b, c)   | a, b, c |
-        // (d, e, f) = | d, e, f |
-        // (g, h, i)   | g, h, i |
+
+    ///
+    /// Create 3x3 Matrix from an array of row arrays.
+    ///
+    /// ```
+    /// use softrender::math::Mat3f;
+    ///
+    /// let m = Mat3f::from_rows(
+    ///     [
+    ///         [1.0, 2.0, 3.0],
+    ///         [4.0, 5.0, 6.0],
+    ///         [4.0, 5.0, 6.0],
+    ///     ]
+    /// );
+    /// ```
+    ///
+    ///     x  y  z        0  1  2
+    /// 0 ( a, b, c )    | a, b, c | 0
+    /// 1 ( d, e, f )    | d, e, f | 1
+    /// 2 ( g, h, i ) -> | g, h, i | 2
+    ///
+    pub fn from_rows(rows: [[f32; 3]; 3]) -> Mat3f {
         Mat3f {
-            m00: data[0][0],
-            m01: data[0][1],
-            m02: data[0][2],
-            m10: data[1][0],
-            m11: data[1][1],
-            m12: data[1][2],
-            m20: data[2][0],
-            m21: data[2][1],
-            m22: data[2][2],
+            c0r0: rows[0][0],
+            c0r1: rows[0][1],
+            c0r2: rows[0][2],
+            c1r0: rows[1][0],
+            c1r1: rows[1][1],
+            c1r2: rows[1][2],
+            c2r0: rows[2][0],
+            c2r1: rows[2][1],
+            c2r2: rows[2][2],
         }
     }
-    pub fn rows(&self) -> [[f32; 3]; 3] {
+
+    ///
+    /// Create an array of rows from a 3x3 Matrix.
+    ///
+    /// ```
+    /// use softrender::math::Mat3f;
+    ///
+    /// let m = Mat3f::identity().to_rows();
+    /// ```
+    ///
+    ///   0  1  2            x  y  z
+    /// 0 | a, b, c |    0 ( a, b, c )
+    /// 1 | d, e, f |    1 ( d, e, f )
+    /// 2 | g, h, i | -> 2 ( g, h, i )
+    ///
+    pub fn to_rows(&self) -> [[f32; 3]; 3] {
         [
-            [self.m00, self.m01, self.m02],
-            [self.m10, self.m11, self.m12],
-            [self.m20, self.m21, self.m22],
+            [self.c0r0, self.c0r1, self.c0r2],
+            [self.c1r0, self.c1r1, self.c1r2],
+            [self.c2r0, self.c2r1, self.c2r2],
         ]
     }
+
+    ///
+    /// Create an array of columns from a 3x3 Matrix.
+    ///
+    /// ```
+    /// use softrender::math::Mat3f;
+    ///
+    /// let m = Mat3f::identity().to_cols();
+    /// ```
+    ///
+    ///     0  1  2          x  y  z
+    /// 0 | a, b, c |    0 ( a, d, g )
+    /// 1 | d, e, f |    1 ( b, e, h )
+    /// 2 | g, h, i | -> 2 ( c, f, i )
+    ///
     pub fn cols(&self) -> [[f32; 3]; 3] {
         [
-            [self.m00, self.m10, self.m20],
-            [self.m01, self.m11, self.m21],
-            [self.m02, self.m12, self.m22],
+            [self.c0r0, self.c1r0, self.c2r0],
+            [self.c0r1, self.c1r1, self.c2r1],
+            [self.c0r2, self.c1r2, self.c2r2],
         ]
     }
+
+    ///
+    /// Create a 3x3 Zero Matrix.
+    ///
+    /// ```
+    /// use softrender::math::Mat3f;
+    ///
+    /// let m = Mat3f::zero();
+    /// ```
+    ///
+    ///       0    1    2
+    /// 0 | 0.0, 0.0, 0.0 |
+    /// 1 | 0.0, 0.0, 0.0 |
+    /// 2 | 0.0, 0.0, 0.0 |
+    ///
+    pub fn zero() -> Mat3f {
+        Mat3f {
+            c0r0: 0.0,
+            c0r1: 0.0,
+            c0r2: 0.0,
+            c1r0: 0.0,
+            c1r1: 0.0,
+            c1r2: 0.0,
+            c2r0: 0.0,
+            c2r1: 0.0,
+            c2r2: 0.0,
+        }
+    }
+
+    ///
+    /// Create a 3x3 Identity Matrix.
+    ///
+    /// ```
+    /// use softrender::math::Mat3f;
+    ///
+    /// let m = Mat3f::identity();
+    /// ```
+    ///
+    ///       0    1    2
+    /// 0 | 1.0, 0.0, 0.0 |
+    /// 1 | 0.0, 1.0, 0.0 |
+    /// 2 | 0.0, 0.0, 1.0 |
+    ///
     pub fn identity() -> Mat3f {
         Mat3f {
-            m00: 1.0,
-            m01: 0.0,
-            m02: 0.0,
-            m10: 0.0,
-            m11: 1.0,
-            m12: 0.0,
-            m20: 0.0,
-            m21: 0.0,
-            m22: 1.0,
+            c0r0: 1.0,
+            c0r1: 0.0,
+            c0r2: 0.0,
+            c1r0: 0.0,
+            c1r1: 1.0,
+            c1r2: 0.0,
+            c2r0: 0.0,
+            c2r1: 0.0,
+            c2r2: 1.0,
         }
     }
+
+    ///
+    /// Calculate the transpose of this matrix.
+    ///
+    /// ```
+    /// use softrender::math::Mat3f;
+    ///
+    /// let m = Mat3f::identity().transpose();
+    /// ```
+    ///
+    ///     0  1  2          0  1  2
+    /// 0 | a, b, c |    0 | a, d, g |
+    /// 1 | d, e, f |    1 | b, e, h |
+    /// 2 | g, h, i | -> 2 | c, f, i |
+    ///
     pub fn transpose(&self) -> Self {
-        Mat3f {
-            m00: self.m00,
-            m01: self.m10,
-            m02: self.m20,
-            m10: self.m01,
-            m11: self.m11,
-            m12: self.m21,
-            m20: self.m02,
-            m21: self.m12,
-            m22: self.m22,
+        Self {
+            c0r0: self.c0r0,
+            c0r1: self.c1r0,
+            c0r2: self.c2r0,
+            c1r0: self.c0r1,
+            c1r1: self.c1r1,
+            c1r2: self.c2r1,
+            c2r0: self.c0r2,
+            c2r1: self.c1r2,
+            c2r2: self.c2r2,
         }
     }
+
+    ///
+    /// Calculate the determinant of this Matrix
+    ///
+    /// ```
+    /// use softrender::math::Mat3f;
+    ///
+    /// let m = Mat3f::identity().determinant();
+    /// ```
+    ///
     pub fn determinant(&self) -> f32 {
-        let b01 = self.m00 * (self.m11 * self.m22 - self.m21 * self.m12);
-        let b02 = self.m10 * (self.m01 * self.m22 - self.m21 * self.m02);
-        let b03 = self.m20 * (self.m01 * self.m12 - self.m11 * self.m02);
+        let b01 = self.c0r0 * (self.c1r1 * self.c2r2 - self.c2r1 * self.c1r2);
+        let b02 = self.c1r0 * (self.c0r1 * self.c2r2 - self.c2r1 * self.c0r2);
+        let b03 = self.c2r0 * (self.c0r1 * self.c1r2 - self.c1r1 * self.c0r2);
         b01 - b02 + b03
     }
+    ///
+    /// Calculate the inversion of this Matrix
+    ///
     pub fn invert(&self) -> Option<Mat3f> {
         let det = self.determinant();
         if det == 0.0 {
             None
         } else {
-            None
-            /*
             Some(
-                Mat3f::from_cols([
-                    self[1].cross(self[2]) / det,
-                    self[2].cross(self[0]) / det,
-                    self[0].cross(self[1]) / det,
-        ]
-                ).transpose(),
+                Self {
+                    c0r0: (self.c1r1 * self.c2r2 - self.c1r2 * self.c2r1) / det,
+                    c0r1: -(self.c0r1 * self.c2r2 - self.c0r2 * self.c2r1) / det,
+                    c0r2: (self.c0r1 * self.c1r2 - self.c0r2 * self.c1r1) / det,
+                    c1r0: -(-self.c2r0 * self.c1r2 + self.c1r0 * self.c2r2) / det,
+                    c1r1: (-self.c2r0 * self.c0r2 + self.c0r0 * self.c2r2) / det,
+                    c1r2: -(-self.c1r0 * self.c0r2 + self.c0r0 * self.c1r2) / det,
+                    c2r0: (-self.c2r0 * self.c1r1 + self.c1r0 * self.c2r1) / det,
+                    c2r1: -(-self.c2r0 * self.c0r1 + self.c0r0 * self.c2r1) / det,
+                    c2r2: (-self.c1r0 * self.c0r2 + self.c0r0 * self.c1r1) / det,
+                }
             )
-            */
         }
     }
 }
@@ -157,9 +278,9 @@ impl Default for Mat3f {
 impl fmt::Debug for Mat3f {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "\n[ {}, {}, {} ]\n[ {}, {}, {} ]\n[ {}, {}, {} ]\n",
-               self.m00, self.m01, self.m02,
-               self.m10, self.m11, self.m12,
-               self.m20, self.m21, self.m22,
+               self.c0r0, self.c0r1, self.c0r2,
+               self.c1r0, self.c1r1, self.c1r2,
+               self.c2r0, self.c2r1, self.c2r2,
         )
     }
 }
@@ -173,15 +294,15 @@ impl ops::Add<Self> for Mat3f {
     /// 2 | G, H, I |   | G, H, I |   | G + g, H + h, I + i |
     fn add(self, rhs: Self) -> Self {
         Self {
-            m00: (self.m00 + rhs.m00),
-            m01: (self.m01 + rhs.m01),
-            m02: (self.m02 + rhs.m02),
-            m10: (self.m10 + rhs.m10),
-            m11: (self.m11 + rhs.m11),
-            m12: (self.m12 + rhs.m12),
-            m20: (self.m20 + rhs.m20),
-            m21: (self.m21 + rhs.m21),
-            m22: (self.m22 + rhs.m22),
+            c0r0: (self.c0r0 + rhs.c0r0),
+            c0r1: (self.c0r1 + rhs.c0r1),
+            c0r2: (self.c0r2 + rhs.c0r2),
+            c1r0: (self.c1r0 + rhs.c1r0),
+            c1r1: (self.c1r1 + rhs.c1r1),
+            c1r2: (self.c1r2 + rhs.c1r2),
+            c2r0: (self.c2r0 + rhs.c2r0),
+            c2r1: (self.c2r1 + rhs.c2r1),
+            c2r2: (self.c2r2 + rhs.c2r2),
         }
     }
 }
@@ -201,15 +322,15 @@ impl ops::Mul<Self> for Mat3f {
     /// 2 | I, J, K |   | i, j, k |   | Ia + Je + Ki, Ib + Jf + Kj, Ic + Jg + Kk, Id + Jh + Kl |
     fn mul(self, rhs: Self) -> Self {
         Self {
-            m00: (self.m00 * rhs.m00) + (self.m01 * rhs.m10) + (self.m02 * rhs.m20),
-            m01: (self.m00 * rhs.m01) + (self.m01 * rhs.m11) + (self.m02 * rhs.m21),
-            m02: (self.m00 * rhs.m02) + (self.m01 * rhs.m12) + (self.m02 * rhs.m22),
-            m10: (self.m10 * rhs.m00) + (self.m11 * rhs.m10) + (self.m12 * rhs.m20),
-            m11: (self.m10 * rhs.m01) + (self.m11 * rhs.m11) + (self.m12 * rhs.m21),
-            m12: (self.m10 * rhs.m02) + (self.m11 * rhs.m12) + (self.m12 * rhs.m22),
-            m20: (self.m20 * rhs.m00) + (self.m21 * rhs.m10) + (self.m22 * rhs.m20),
-            m21: (self.m20 * rhs.m01) + (self.m21 * rhs.m11) + (self.m22 * rhs.m21),
-            m22: (self.m20 * rhs.m02) + (self.m21 * rhs.m12) + (self.m22 * rhs.m22),
+            c0r0: (self.c0r0 * rhs.c0r0) + (self.c0r1 * rhs.c1r0) + (self.c0r2 * rhs.c2r0),
+            c0r1: (self.c0r0 * rhs.c0r1) + (self.c0r1 * rhs.c1r1) + (self.c0r2 * rhs.c2r1),
+            c0r2: (self.c0r0 * rhs.c0r2) + (self.c0r1 * rhs.c1r2) + (self.c0r2 * rhs.c2r2),
+            c1r0: (self.c1r0 * rhs.c0r0) + (self.c1r1 * rhs.c1r0) + (self.c1r2 * rhs.c2r0),
+            c1r1: (self.c1r0 * rhs.c0r1) + (self.c1r1 * rhs.c1r1) + (self.c1r2 * rhs.c2r1),
+            c1r2: (self.c1r0 * rhs.c0r2) + (self.c1r1 * rhs.c1r2) + (self.c1r2 * rhs.c2r2),
+            c2r0: (self.c2r0 * rhs.c0r0) + (self.c2r1 * rhs.c1r0) + (self.c2r2 * rhs.c2r0),
+            c2r1: (self.c2r0 * rhs.c0r1) + (self.c2r1 * rhs.c1r1) + (self.c2r2 * rhs.c2r1),
+            c2r2: (self.c2r0 * rhs.c0r2) + (self.c2r1 * rhs.c1r2) + (self.c2r2 * rhs.c2r2),
         }
     }
 }
@@ -229,9 +350,9 @@ impl ops::Mul<Vec3f> for Mat3f {
     /// 2 | G, H, I |   | z | = | Gx + Hy + Iz |
     fn mul(self, rhs: Vec3f) -> Vec3f {
         Vec3f {
-            x: (self.m00 * rhs.x) + (self.m01 * rhs.y) + (self.m02 * rhs.z),
-            y: (self.m10 * rhs.x) + (self.m11 * rhs.y) + (self.m12 * rhs.z),
-            z: (self.m20 * rhs.x) + (self.m21 * rhs.y) + (self.m22 * rhs.z),
+            x: (self.c0r0 * rhs.x) + (self.c0r1 * rhs.y) + (self.c0r2 * rhs.z),
+            y: (self.c1r0 * rhs.x) + (self.c1r1 * rhs.y) + (self.c1r2 * rhs.z),
+            z: (self.c2r0 * rhs.x) + (self.c2r1 * rhs.y) + (self.c2r2 * rhs.z),
         }
     }
 }
@@ -245,15 +366,15 @@ impl ops::Sub<Self> for Mat3f {
     /// 2 | G, H, I |   | G, H, I |   | G - g, H - h, I - i |
     fn sub(self, rhs: Self) -> Self {
         Self {
-            m00: (self.m00 - rhs.m00),
-            m01: (self.m01 - rhs.m01),
-            m02: (self.m02 - rhs.m02),
-            m10: (self.m10 - rhs.m10),
-            m11: (self.m11 - rhs.m11),
-            m12: (self.m12 - rhs.m12),
-            m20: (self.m20 - rhs.m20),
-            m21: (self.m21 - rhs.m21),
-            m22: (self.m22 - rhs.m22),
+            c0r0: (self.c0r0 - rhs.c0r0),
+            c0r1: (self.c0r1 - rhs.c0r1),
+            c0r2: (self.c0r2 - rhs.c0r2),
+            c1r0: (self.c1r0 - rhs.c1r0),
+            c1r1: (self.c1r1 - rhs.c1r1),
+            c1r2: (self.c1r2 - rhs.c1r2),
+            c2r0: (self.c2r0 - rhs.c2r0),
+            c2r1: (self.c2r1 - rhs.c2r1),
+            c2r2: (self.c2r2 - rhs.c2r2),
         }
     }
 }
@@ -277,24 +398,24 @@ mod tests {
             [1.0, -2.0, -7.0],
             [0.0, 1.0, 1.0],
         ];
-        let m = Mat3f::from_array_rows(a.clone());
-        let b = m.rows();
+        let m = Mat3f::from_rows(a.clone());
+        let b = m.to_rows();
         assert_eq!(a, b);
-        assert_approx_eq!(m.m00, -3.0);
-        assert_approx_eq!(m.m11, -2.0);
-        assert_approx_eq!(m.m22, 1.0);
+        assert_approx_eq!(m.c0r0, -3.0);
+        assert_approx_eq!(m.c1r1, -2.0);
+        assert_approx_eq!(m.c2r2, 1.0);
     }
 
     #[test]
     fn test_transpose() {
-        let a = Mat3f::from_array_rows(
+        let a = Mat3f::from_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        let b = Mat3f::from_array_rows(
+        let b = Mat3f::from_rows(
             [
                 [1.0, 4.0, 7.0],
                 [2.0, 5.0, 8.0],
@@ -306,7 +427,7 @@ mod tests {
 
     #[test]
     fn test_determinant() {
-        let a = Mat3f::from_array_rows(
+        let a = Mat3f::from_rows(
             [
                 [1.0, 2.0, 3.0],
                 [3.0, 1.0, 2.0],
@@ -318,14 +439,14 @@ mod tests {
 
     #[test]
     fn test_invert() {
-        let a = Mat3f::from_array_rows(
+        let a = Mat3f::from_rows(
             [
                 [1.0, 2.0, 3.0],
                 [3.0, 1.0, 2.0],
                 [3.0, 2.0, 1.0],
             ]
         );
-        let b = Mat3f::from_array_rows(
+        let b = Mat3f::from_rows(
             [
                 [-0.375, 0.5, 0.125],
                 [0.5, -1.0, 0.5],
@@ -337,14 +458,14 @@ mod tests {
 
     #[test]
     fn test_partialeq() {
-        let a = Mat3f::from_array_rows(
+        let a = Mat3f::from_rows(
             [
                 [1.0 + 1.0, 2.0 + 2.0, 3.0 + 1.5],
                 [1.5 - 0.5, 3.0, 2.25 + 1.10],
                 [3.0 / 2.0, 4.0 * 2.0, 4.5],
             ]
         );
-        let b = Mat3f::from_array_rows(
+        let b = Mat3f::from_rows(
             [
                 [2.0, 4.0, 4.5],
                 [1.0, 3.0, 3.35],
@@ -356,21 +477,21 @@ mod tests {
 
     #[test]
     fn test_add_mat3f() {
-        let a = Mat3f::from_array_rows(
+        let a = Mat3f::from_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        let b = Mat3f::from_array_rows(
+        let b = Mat3f::from_rows(
             [
                 [9.0, 8.0, 7.0],
                 [6.0, 5.0, 4.0],
                 [3.0, 2.0, 1.0],
             ]
         );
-        let c = Mat3f::from_array_rows(
+        let c = Mat3f::from_rows(
             [
                 [10.0, 10.0, 10.0],
                 [10.0, 10.0, 10.0],
@@ -382,21 +503,21 @@ mod tests {
 
     #[test]
     fn test_addassign_mat3f() {
-        let mut a = Mat3f::from_array_rows(
+        let mut a = Mat3f::from_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        a += Mat3f::from_array_rows(
+        a += Mat3f::from_rows(
             [
                 [9.0, 8.0, 7.0],
                 [6.0, 5.0, 4.0],
                 [3.0, 2.0, 1.0],
             ]
         );
-        let c = Mat3f::from_array_rows(
+        let c = Mat3f::from_rows(
             [
                 [10.0, 10.0, 10.0],
                 [10.0, 10.0, 10.0],
@@ -408,21 +529,21 @@ mod tests {
 
     #[test]
     fn test_mul_mat3f() {
-        let a = Mat3f::from_array_rows(
+        let a = Mat3f::from_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        let b = Mat3f::from_array_rows(
+        let b = Mat3f::from_rows(
             [
                 [9.0, 8.0, 7.0],
                 [6.0, 5.0, 4.0],
                 [3.0, 2.0, 1.0],
             ]
         );
-        let c = Mat3f::from_array_rows(
+        let c = Mat3f::from_rows(
             [
                 [30.0, 24.0, 18.0],
                 [84.0, 69.0, 54.0],
@@ -434,21 +555,21 @@ mod tests {
 
     #[test]
     fn test_mulassign_mat3f() {
-        let mut a = Mat3f::from_array_rows(
+        let mut a = Mat3f::from_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        a *= Mat3f::from_array_rows(
+        a *= Mat3f::from_rows(
             [
                 [9.0, 8.0, 7.0],
                 [6.0, 5.0, 4.0],
                 [3.0, 2.0, 1.0],
             ]
         );
-        let c = Mat3f::from_array_rows(
+        let c = Mat3f::from_rows(
             [
                 [30.0, 24.0, 18.0],
                 [84.0, 69.0, 54.0],
@@ -460,7 +581,7 @@ mod tests {
 
     #[test]
     fn test_mul_vec3f() {
-        let a = Mat3f::from_array_rows(
+        let a = Mat3f::from_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
@@ -474,21 +595,21 @@ mod tests {
 
     #[test]
     fn test_sub_mat3f() {
-        let a = Mat3f::from_array_rows(
+        let a = Mat3f::from_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        let b = Mat3f::from_array_rows(
+        let b = Mat3f::from_rows(
             [
                 [9.0, 8.0, 7.0],
                 [6.0, 5.0, 4.0],
                 [3.0, 2.0, 1.0],
             ]
         );
-        let c = Mat3f::from_array_rows(
+        let c = Mat3f::from_rows(
             [
                 [-8.0, -6.0, -4.0],
                 [-2.0, 0.0, 2.0],
@@ -500,21 +621,21 @@ mod tests {
 
     #[test]
     fn test_subassign_mat3f() {
-        let mut a = Mat3f::from_array_rows(
+        let mut a = Mat3f::from_rows(
             [
                 [1.0, 2.0, 3.0],
                 [4.0, 5.0, 6.0],
                 [7.0, 8.0, 9.0],
             ]
         );
-        a -= Mat3f::from_array_rows(
+        a -= Mat3f::from_rows(
             [
                 [9.0, 8.0, 7.0],
                 [6.0, 5.0, 4.0],
                 [3.0, 2.0, 1.0],
             ]
         );
-        let c = Mat3f::from_array_rows(
+        let c = Mat3f::from_rows(
             [
                 [-8.0, -6.0, -4.0],
                 [-2.0, 0.0, 2.0],

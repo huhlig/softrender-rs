@@ -1,12 +1,13 @@
 [package]
-name = "render"
+name = "softrender"
 edition = "2018"
 version = "0.1.0"
 authors = ["Hans W. Uhlig <hans.uhlig@ibm.com>"]
+description = "Experimental CPU based rendering library"
 
 [dependencies]
-minifb = "0.10"
 byteorder = "1.3.2"
+minifb = "0.10"
 tracing = "0.1.12"
 
 [dev-dependencies]

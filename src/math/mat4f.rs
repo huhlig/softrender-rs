@@ -21,35 +21,37 @@ use super::{Vec3f, Vec4f};
 ///
 #[derive(Copy, Clone, PartialEq)]
 pub struct Mat4f {
-    pub m00: f32,
-    pub m01: f32,
-    pub m02: f32,
-    pub m03: f32,
-    pub m10: f32,
-    pub m11: f32,
-    pub m12: f32,
-    pub m13: f32,
-    pub m20: f32,
-    pub m21: f32,
-    pub m22: f32,
-    pub m23: f32,
-    pub m30: f32,
-    pub m31: f32,
-    pub m32: f32,
-    pub m33: f32,
+    pub c0r0: f32,
+    pub c0r1: f32,
+    pub c0r2: f32,
+    pub c0r3: f32,
+    pub c1r0: f32,
+    pub c1r1: f32,
+    pub c1r2: f32,
+    pub c1r3: f32,
+    pub c2r0: f32,
+    pub c2r1: f32,
+    pub c2r2: f32,
+    pub c2r3: f32,
+    pub c3r0: f32,
+    pub c3r1: f32,
+    pub c3r2: f32,
+    pub c3r3: f32,
 }
 
 impl Mat4f {
+    ///
     /// Create 4x4 Matrix from an array of column arrays.
     ///
     /// ```
-    /// use render::math::Mat4f;
+    /// use softrender::math::Mat4f;
     ///
-    /// let m = Mat4f::from_array_cols(
+    /// let m = Mat4f::from_cols(
     ///     [
-    ///         [1.0, 2.0, 3.0],
-    ///         [4.0, 5.0, 6.0],
-    ///         [4.0, 5.0, 6.0],
+    ///         [ 1.0,  2.0,  3.0,  4.0],
+    ///         [ 5.0,  6.0,  7.0,  8.0],
+    ///         [ 9.0, 10.0, 11.0, 12.0],
+    ///         [13.0, 14.0, 15.0, 16.0],
     ///     ]
     /// );
     /// ```
@@ -60,144 +62,282 @@ impl Mat4f {
     /// ( c, g, k, o )    2 | i, j, k, l |
     /// ( d, h, l, p )  = 3 | m, n, o, p |
     ///
-    pub fn from_array_cols(data: [[f32; 4]; 4]) -> Mat4f {
+    pub fn from_cols(data: [[f32; 4]; 4]) -> Mat4f {
         Mat4f {
-            m00: data[0][0],
-            m01: data[1][0],
-            m02: data[2][0],
-            m03: data[3][0],
-            m10: data[0][1],
-            m11: data[1][1],
-            m12: data[2][1],
-            m13: data[3][1],
-            m20: data[0][2],
-            m21: data[1][2],
-            m22: data[2][2],
-            m23: data[3][2],
-            m30: data[0][3],
-            m31: data[1][3],
-            m32: data[2][3],
-            m33: data[3][3],
+            c0r0: data[0][0],
+            c0r1: data[1][0],
+            c0r2: data[2][0],
+            c0r3: data[3][0],
+            c1r0: data[0][1],
+            c1r1: data[1][1],
+            c1r2: data[2][1],
+            c1r3: data[3][1],
+            c2r0: data[0][2],
+            c2r1: data[1][2],
+            c2r2: data[2][2],
+            c2r3: data[3][2],
+            c3r0: data[0][3],
+            c3r1: data[1][3],
+            c3r2: data[2][3],
+            c3r3: data[3][3],
         }
     }
+
+    ///
     /// Create 4x4 Matrix from an array of row arrays.
     ///
     /// ```
-    /// use softrender::math::Mat3f;
+    /// use softrender::math::Mat4f;
     ///
-    /// let m = Mat3f::from_array_cols(
+    /// let m = Mat4f::from_rows(
     ///     [
-    ///         [1.0, 2.0, 3.0],
-    ///         [4.0, 5.0, 6.0],
-    ///         [4.0, 5.0, 6.0],
+    ///         [ 1.0,  5.0,  9.0, 13.0],
+    ///         [ 2.0,  6.0, 10.0, 14.0],
+    ///         [ 3.0,  7.0, 11.0, 15.0],
+    ///         [ 4.0,  8.0, 12.0, 16.0],
     ///     ]
     /// );
     /// ```
     ///
-    ///                       0  1  2  3
-    /// ( a, e, i, m )    0 | a, b, c, d |
-    /// ( b, f, j, n )    1 | e, f, g, h |
-    /// ( c, g, k, o )    2 | i, j, k, l |
-    /// ( d, h, l, p )  = 3 | m, n, o, p |
+    ///   x  y  z  w          0  1  2  3
+    /// ( a, b, c, d )    0 | a, b, c, d |
+    /// ( e, f, g, h )    1 | e, f, g, h |
+    /// ( i, j, k, l )    2 | i, j, k, l |
+    /// ( m, n, o, p )  = 3 | m, n, o, p |
     ///
-    pub fn from_array_rows(data: [[f32; 4]; 4]) -> Mat4f {
+    pub fn from_rows(data: [[f32; 4]; 4]) -> Mat4f {
         Mat4f {
-            m00: data[0][0],
-            m01: data[0][1],
-            m02: data[0][2],
-            m03: data[0][3],
-            m10: data[1][0],
-            m11: data[1][1],
-            m12: data[1][2],
-            m13: data[1][3],
-            m20: data[2][0],
-            m21: data[2][1],
-            m22: data[2][2],
-            m23: data[2][3],
-            m30: data[3][0],
-            m31: data[3][1],
-            m32: data[3][2],
-            m33: data[3][3],
+            c0r0: data[0][0],
+            c0r1: data[0][1],
+            c0r2: data[0][2],
+            c0r3: data[0][3],
+            c1r0: data[1][0],
+            c1r1: data[1][1],
+            c1r2: data[1][2],
+            c1r3: data[1][3],
+            c2r0: data[2][0],
+            c2r1: data[2][1],
+            c2r2: data[2][2],
+            c2r3: data[2][3],
+            c3r0: data[3][0],
+            c3r1: data[3][1],
+            c3r2: data[3][2],
+            c3r3: data[3][3],
         }
     }
+    /// Create 4x4 Zero Matrix.
+    ///
+    /// ```
+    /// use softrender::math::Mat4f;
+    ///
+    /// let m = Mat4f::zero();
+    /// ```
+    ///
+    ///       0    1    2    3
+    /// 0 | 0.0, 0.0, 0.0, 0.0 |
+    /// 1 | 0.0, 0.0, 0.0, 0.0 |
+    /// 2 | 0.0, 0.0, 0.0, 0.0 |
+    /// 3 | 0.0, 0.0, 0.0, 0.0 |
+    ///
+    pub fn zero() -> Mat4f {
+        Mat4f {
+            c0r0: 0.0,
+            c0r1: 0.0,
+            c0r2: 0.0,
+            c0r3: 0.0,
+            c1r0: 0.0,
+            c1r1: 0.0,
+            c1r2: 0.0,
+            c1r3: 0.0,
+            c2r0: 0.0,
+            c2r1: 0.0,
+            c2r2: 0.0,
+            c2r3: 0.0,
+            c3r0: 0.0,
+            c3r1: 0.0,
+            c3r2: 0.0,
+            c3r3: 0.0,
+        }
+    }
+
+    /// Create 4x4 Identity Matrix.
+    ///
+    /// ```
+    /// use softrender::math::Mat4f;
+    ///
+    /// let m = Mat4f::identity();
+    /// ```
+    ///
+    ///       0    1    2    3
+    /// 0 | 1.0, 0.0, 0.0, 0.0 |
+    /// 1 | 0.0, 1.0, 0.0, 0.0 |
+    /// 2 | 0.0, 0.0, 1.0, 0.0 |
+    /// 3 | 0.0, 0.0, 0.0, 1.0 |
+    ///
     pub fn identity() -> Mat4f {
         Mat4f {
-            m00: 1.0,
-            m01: 0.0,
-            m02: 0.0,
-            m03: 0.0,
-            m10: 0.0,
-            m11: 1.0,
-            m12: 0.0,
-            m13: 0.0,
-            m20: 0.0,
-            m21: 0.0,
-            m22: 1.0,
-            m23: 0.0,
-            m30: 0.0,
-            m31: 0.0,
-            m32: 0.0,
-            m33: 1.0,
+            c0r0: 1.0,
+            c0r1: 0.0,
+            c0r2: 0.0,
+            c0r3: 0.0,
+            c1r0: 0.0,
+            c1r1: 1.0,
+            c1r2: 0.0,
+            c1r3: 0.0,
+            c2r0: 0.0,
+            c2r1: 0.0,
+            c2r2: 1.0,
+            c2r3: 0.0,
+            c3r0: 0.0,
+            c3r1: 0.0,
+            c3r2: 0.0,
+            c3r3: 1.0,
         }
     }
+    ///
+    /// Calculate the transpose of this matrix.
+    ///
+    /// ```
+    /// use softrender::math::Mat4f;
+    ///
+    /// let m = Mat4f::identity().transpose();
+    /// ```
+    ///
+    ///     0  1  2  3          0  1  2  3
+    /// 0 | a, b, c, d |    0 | a, e, i, m |
+    /// 1 | e, f, g, h |    1 | b, f, j, n |
+    /// 2 | i, j, k, l |    2 | c, g, k, o |
+    /// 3 | m, n, o, p | -> 3 | d, h, l, p |
+    ///
     pub fn transpose(&self) -> Self {
         Self {
-            m00: self.m00,
-            m01: self.m10,
-            m02: self.m20,
-            m03: self.m30,
-            m10: self.m01,
-            m11: self.m11,
-            m12: self.m21,
-            m13: self.m31,
-            m20: self.m02,
-            m21: self.m12,
-            m22: self.m22,
-            m23: self.m32,
-            m30: self.m03,
-            m31: self.m13,
-            m32: self.m23,
-            m33: self.m33,
+            c0r0: self.c0r0,
+            c0r1: self.c1r0,
+            c0r2: self.c2r0,
+            c0r3: self.c3r0,
+            c1r0: self.c0r1,
+            c1r1: self.c1r1,
+            c1r2: self.c2r1,
+            c1r3: self.c3r1,
+            c2r0: self.c0r2,
+            c2r1: self.c1r2,
+            c2r2: self.c2r2,
+            c2r3: self.c3r2,
+            c3r0: self.c0r3,
+            c3r1: self.c1r3,
+            c3r2: self.c2r3,
+            c3r3: self.c3r3,
         }
     }
+    ///
+    /// Calculate the determinant of this Matrix
+    ///
+    /// ```
+    /// use softrender::math::Mat4f;
+    ///
+    /// let m = Mat4f::identity().determinant();
+    /// ```
+    ///
     pub fn determinant(&self) -> f32 {
-        let b00 = self.m00 * self.m11 - self.m01 * self.m10;
-        let b01 = self.m00 * self.m12 - self.m02 * self.m10;
-        let b02 = self.m00 * self.m13 - self.m03 * self.m10;
-        let b03 = self.m01 * self.m12 - self.m02 * self.m11;
-        let b04 = self.m01 * self.m13 - self.m03 * self.m11;
-        let b05 = self.m02 * self.m13 - self.m03 * self.m12;
-        let b06 = self.m20 * self.m31 - self.m21 * self.m30;
-        let b07 = self.m20 * self.m32 - self.m22 * self.m30;
-        let b08 = self.m20 * self.m33 - self.m23 * self.m30;
-        let b09 = self.m21 * self.m32 - self.m22 * self.m31;
-        let b10 = self.m21 * self.m33 - self.m23 * self.m31;
-        let b11 = self.m22 * self.m33 - self.m23 * self.m32;
+        let b00 = self.c0r0 * self.c1r1 - self.c0r1 * self.c1r0;
+        let b01 = self.c0r0 * self.c1r2 - self.c0r2 * self.c1r0;
+        let b02 = self.c0r0 * self.c1r3 - self.c0r3 * self.c1r0;
+        let b03 = self.c0r1 * self.c1r2 - self.c0r2 * self.c1r1;
+        let b04 = self.c0r1 * self.c1r3 - self.c0r3 * self.c1r1;
+        let b05 = self.c0r2 * self.c1r3 - self.c0r3 * self.c1r2;
+        let b06 = self.c2r0 * self.c3r1 - self.c2r1 * self.c3r0;
+        let b07 = self.c2r0 * self.c3r2 - self.c2r2 * self.c3r0;
+        let b08 = self.c2r0 * self.c3r3 - self.c2r3 * self.c3r0;
+        let b09 = self.c2r1 * self.c3r2 - self.c2r2 * self.c3r1;
+        let b10 = self.c2r1 * self.c3r3 - self.c2r3 * self.c3r1;
+        let b11 = self.c2r2 * self.c3r3 - self.c2r3 * self.c3r2;
 
         b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06
     }
+    ///
+    /// Calculate the inversion of this Matrix
+    ///
+    /// ```
+    /// use softrender::math::Mat4f;
+    ///
+    /// let m = Mat4f::identity().determinant();
+    /// ```
+    ///
     pub fn invert(&self) -> Option<Self> {
-        unimplemented!()
+        let x00 = self.c0r0;
+        let x01 = self.c0r1;
+        let x02 = self.c0r3;
+        let x03 = self.c0r3;
+        let x04 = self.c1r0;
+        let x05 = self.c1r1;
+        let x06 = self.c1r2;
+        let x07 = self.c1r3;
+        let x08 = self.c2r0;
+        let x09 = self.c2r1;
+        let x10 = self.c2r2;
+        let x11 = self.c2r3;
+        let x12 = self.c3r0;
+        let x13 = self.c3r1;
+        let x14 = self.c3r2;
+        let x15 = self.c3r3;
+        let a00 = x00 * x05 - x01 * x04;
+        let a01 = x00 * x06 - x02 * x04;
+        let a02 = x00 * x07 - x03 * x04;
+        let a03 = x01 * x06 - x02 * x05;
+        let a04 = x01 * x07 - x03 * x05;
+        let a05 = x02 * x07 - x03 * x06;
+        let b00 = x08 * x13 - x09 * x12;
+        let b01 = x08 * x14 - x10 * x12;
+        let b02 = x08 * x15 - x11 * x12;
+        let b03 = x09 * x14 - x10 * x13;
+        let b04 = x09 * x15 - x11 * x13;
+        let b05 = x10 * x15 - x11 * x14;
+        let det = a00 * b05 - a01 * b04 + a02 * b03 + a03 * b02 - a04 * b01 + a05 * b00;
+        if det == 0.0 {
+            None
+        } else {
+            let inv_det = 1.0 / det;
+            Some(
+                Self {
+                    c0r0: (0.0 + x05 * b05 - x06 * b04 + x07 * b03) * inv_det,
+                    c0r1: (0.0 - x01 * b05 + x02 * b04 - x03 * b03) * inv_det,
+                    c0r2: (0.0 + x13 * a05 - x14 * a04 + x15 * a03) * inv_det,
+                    c0r3: (0.0 - x09 * a05 + x10 * a04 - x11 * a03) * inv_det,
+                    c1r0: (0.0 - x04 * b05 + x06 * b02 - x07 * b01) * inv_det,
+                    c1r1: (0.0 + x00 * b05 - x02 * b02 + x03 * b01) * inv_det,
+                    c1r2: (0.0 - x12 * a05 + x14 * a02 - x15 * a01) * inv_det,
+                    c1r3: (0.0 + x08 * a05 - x10 * a02 + x11 * a01) * inv_det,
+                    c2r0: (0.0 + x04 * b04 - x05 * b02 + x07 * b00) * inv_det,
+                    c2r1: (0.0 - x00 * b04 + x01 * b02 - x03 * b00) * inv_det,
+                    c2r2: (0.0 + x12 * a04 - x13 * a02 + x15 * a00) * inv_det,
+                    c2r3: (0.0 - x08 * a04 + x09 * a02 - x11 * a00) * inv_det,
+                    c3r0: (0.0 - x04 * b03 + x05 * b01 - x06 * b00) * inv_det,
+                    c3r1: (0.0 + x00 * b03 - x01 * b01 + x02 * b00) * inv_det,
+                    c3r2: (0.0 - x12 * a03 + x13 * a01 - x14 * a00) * inv_det,
+                    c3r3: (0.0 + x08 * a03 - x09 * a01 + x10 * a00) * inv_det,
+                }
+            )
+        }
     }
     pub fn perspective(fov_deg: f32, aspect_ratio: f32, near: f32, far: f32) -> Self {
         let fov_rad = 1.0 / (fov_deg * 0.5 / 180.0 * std::f32::consts::PI).tan();
         Mat4f {
-            m00: aspect_ratio * fov_rad,
-            m01: 0.0,
-            m02: 0.0,
-            m03: 0.0,
-            m10: 0.0,
-            m11: fov_rad,
-            m12: 0.0,
-            m13: 0.0,
-            m20: 0.0,
-            m21: 0.0,
-            m22: far / (far - near),
-            m23: 1.0,
-            m30: 0.0,
-            m31: 0.0,
-            m32: (-far * near) / (far - near),
-            m33: 0.0,
+            c0r0: aspect_ratio * fov_rad,
+            c0r1: 0.0,
+            c0r2: 0.0,
+            c0r3: 0.0,
+            c1r0: 0.0,
+            c1r1: fov_rad,
+            c1r2: 0.0,
+            c1r3: 0.0,
+            c2r0: 0.0,
+            c2r1: 0.0,
+            c2r2: far / (far - near),
+            c2r3: 1.0,
+            c3r0: 0.0,
+            c3r1: 0.0,
+            c3r2: (-far * near) / (far - near),
+            c3r3: 0.0,
         }
     }
     pub fn look_at(eye: Vec3f, target: Vec3f, up: Vec3f) -> Self {
@@ -218,10 +358,10 @@ impl Mat4f {
 impl fmt::Debug for Mat4f {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "\n[ {}, {}, {}, {} ]\n[ {}, {}, {}, {} ]\n[ {}, {}, {}, {} ]\n[ {}, {}, {}, {} ]\n",
-               self.m00, self.m01, self.m02, self.m03,
-               self.m10, self.m11, self.m12, self.m13,
-               self.m20, self.m21, self.m22, self.m23,
-               self.m30, self.m31, self.m32, self.m33,
+               self.c0r0, self.c0r1, self.c0r2, self.c0r3,
+               self.c1r0, self.c1r1, self.c1r2, self.c1r3,
+               self.c2r0, self.c2r1, self.c2r2, self.c2r3,
+               self.c3r0, self.c3r1, self.c3r2, self.c3r3,
         )
     }
 }
@@ -236,22 +376,22 @@ impl ops::Add<Self> for Mat4f {
     /// 3 | M, N, O, P |   | m, n, o, p |   | M + m, N + n, O + o, P + p |
     fn add(self, rhs: Self) -> Self {
         Self {
-            m00: self.m00 + rhs.m00,
-            m01: self.m01 + rhs.m01,
-            m02: self.m02 + rhs.m02,
-            m03: self.m03 + rhs.m03,
-            m10: self.m10 + rhs.m10,
-            m11: self.m11 + rhs.m11,
-            m12: self.m12 + rhs.m12,
-            m13: self.m13 + rhs.m13,
-            m20: self.m20 + rhs.m20,
-            m21: self.m21 + rhs.m21,
-            m22: self.m22 + rhs.m22,
-            m23: self.m23 + rhs.m23,
-            m30: self.m30 + rhs.m30,
-            m31: self.m31 + rhs.m31,
-            m32: self.m32 + rhs.m32,
-            m33: self.m33 + rhs.m33,
+            c0r0: self.c0r0 + rhs.c0r0,
+            c0r1: self.c0r1 + rhs.c0r1,
+            c0r2: self.c0r2 + rhs.c0r2,
+            c0r3: self.c0r3 + rhs.c0r3,
+            c1r0: self.c1r0 + rhs.c1r0,
+            c1r1: self.c1r1 + rhs.c1r1,
+            c1r2: self.c1r2 + rhs.c1r2,
+            c1r3: self.c1r3 + rhs.c1r3,
+            c2r0: self.c2r0 + rhs.c2r0,
+            c2r1: self.c2r1 + rhs.c2r1,
+            c2r2: self.c2r2 + rhs.c2r2,
+            c2r3: self.c2r3 + rhs.c2r3,
+            c3r0: self.c3r0 + rhs.c3r0,
+            c3r1: self.c3r1 + rhs.c3r1,
+            c3r2: self.c3r2 + rhs.c3r2,
+            c3r3: self.c3r3 + rhs.c3r3,
         }
     }
 }
@@ -272,22 +412,22 @@ impl ops::Mul<Self> for Mat4f {
     /// 3 | M, N, O, P |   | m, n, o, p |   | Ma + Ne + Oi + Pm, Mb + Nf + Oj + Pn, Mc + Ng + Ok + Po, Md + Nh + Ol + Pp |
     fn mul(self, rhs: Self) -> Self {
         Self {
-            m00: (self.m00 * rhs.m00) + (self.m01 * rhs.m10) + (self.m02 * rhs.m20) + (self.m03 * rhs.m30),
-            m01: (self.m00 * rhs.m01) + (self.m01 * rhs.m11) + (self.m02 * rhs.m21) + (self.m03 * rhs.m31),
-            m02: (self.m00 * rhs.m02) + (self.m01 * rhs.m12) + (self.m02 * rhs.m22) + (self.m03 * rhs.m32),
-            m03: (self.m00 * rhs.m03) + (self.m01 * rhs.m13) + (self.m02 * rhs.m23) + (self.m03 * rhs.m33),
-            m10: (self.m10 * rhs.m00) + (self.m11 * rhs.m10) + (self.m12 * rhs.m20) + (self.m13 * rhs.m30),
-            m11: (self.m10 * rhs.m01) + (self.m11 * rhs.m11) + (self.m12 * rhs.m21) + (self.m13 * rhs.m31),
-            m12: (self.m10 * rhs.m02) + (self.m11 * rhs.m12) + (self.m12 * rhs.m22) + (self.m13 * rhs.m32),
-            m13: (self.m10 * rhs.m03) + (self.m11 * rhs.m13) + (self.m12 * rhs.m23) + (self.m13 * rhs.m33),
-            m20: (self.m20 * rhs.m00) + (self.m21 * rhs.m10) + (self.m22 * rhs.m20) + (self.m23 * rhs.m30),
-            m21: (self.m20 * rhs.m01) + (self.m21 * rhs.m11) + (self.m22 * rhs.m21) + (self.m23 * rhs.m31),
-            m22: (self.m20 * rhs.m02) + (self.m21 * rhs.m12) + (self.m22 * rhs.m22) + (self.m23 * rhs.m32),
-            m23: (self.m20 * rhs.m03) + (self.m21 * rhs.m13) + (self.m22 * rhs.m23) + (self.m23 * rhs.m33),
-            m30: (self.m30 * rhs.m00) + (self.m31 * rhs.m10) + (self.m32 * rhs.m20) + (self.m33 * rhs.m30),
-            m31: (self.m30 * rhs.m01) + (self.m31 * rhs.m11) + (self.m32 * rhs.m21) + (self.m33 * rhs.m31),
-            m32: (self.m30 * rhs.m02) + (self.m31 * rhs.m12) + (self.m32 * rhs.m22) + (self.m33 * rhs.m32),
-            m33: (self.m30 * rhs.m03) + (self.m31 * rhs.m13) + (self.m32 * rhs.m23) + (self.m33 * rhs.m33),
+            c0r0: (self.c0r0 * rhs.c0r0) + (self.c0r1 * rhs.c1r0) + (self.c0r2 * rhs.c2r0) + (self.c0r3 * rhs.c3r0),
+            c0r1: (self.c0r0 * rhs.c0r1) + (self.c0r1 * rhs.c1r1) + (self.c0r2 * rhs.c2r1) + (self.c0r3 * rhs.c3r1),
+            c0r2: (self.c0r0 * rhs.c0r2) + (self.c0r1 * rhs.c1r2) + (self.c0r2 * rhs.c2r2) + (self.c0r3 * rhs.c3r2),
+            c0r3: (self.c0r0 * rhs.c0r3) + (self.c0r1 * rhs.c1r3) + (self.c0r2 * rhs.c2r3) + (self.c0r3 * rhs.c3r3),
+            c1r0: (self.c1r0 * rhs.c0r0) + (self.c1r1 * rhs.c1r0) + (self.c1r2 * rhs.c2r0) + (self.c1r3 * rhs.c3r0),
+            c1r1: (self.c1r0 * rhs.c0r1) + (self.c1r1 * rhs.c1r1) + (self.c1r2 * rhs.c2r1) + (self.c1r3 * rhs.c3r1),
+            c1r2: (self.c1r0 * rhs.c0r2) + (self.c1r1 * rhs.c1r2) + (self.c1r2 * rhs.c2r2) + (self.c1r3 * rhs.c3r2),
+            c1r3: (self.c1r0 * rhs.c0r3) + (self.c1r1 * rhs.c1r3) + (self.c1r2 * rhs.c2r3) + (self.c1r3 * rhs.c3r3),
+            c2r0: (self.c2r0 * rhs.c0r0) + (self.c2r1 * rhs.c1r0) + (self.c2r2 * rhs.c2r0) + (self.c2r3 * rhs.c3r0),
+            c2r1: (self.c2r0 * rhs.c0r1) + (self.c2r1 * rhs.c1r1) + (self.c2r2 * rhs.c2r1) + (self.c2r3 * rhs.c3r1),
+            c2r2: (self.c2r0 * rhs.c0r2) + (self.c2r1 * rhs.c1r2) + (self.c2r2 * rhs.c2r2) + (self.c2r3 * rhs.c3r2),
+            c2r3: (self.c2r0 * rhs.c0r3) + (self.c2r1 * rhs.c1r3) + (self.c2r2 * rhs.c2r3) + (self.c2r3 * rhs.c3r3),
+            c3r0: (self.c3r0 * rhs.c0r0) + (self.c3r1 * rhs.c1r0) + (self.c3r2 * rhs.c2r0) + (self.c3r3 * rhs.c3r0),
+            c3r1: (self.c3r0 * rhs.c0r1) + (self.c3r1 * rhs.c1r1) + (self.c3r2 * rhs.c2r1) + (self.c3r3 * rhs.c3r1),
+            c3r2: (self.c3r0 * rhs.c0r2) + (self.c3r1 * rhs.c1r2) + (self.c3r2 * rhs.c2r2) + (self.c3r3 * rhs.c3r2),
+            c3r3: (self.c3r0 * rhs.c0r3) + (self.c3r1 * rhs.c1r3) + (self.c3r2 * rhs.c2r3) + (self.c3r3 * rhs.c3r3),
         }
     }
 }
@@ -308,10 +448,10 @@ impl ops::Mul<Vec4f> for Mat4f {
     /// 3 | M, N, O, P |   | w |   | Mx + Ny + Oz + Pw |
     fn mul(self, rhs: Vec4f) -> Vec4f {
         Vec4f {
-            x: (self.m00 * rhs.x) + (self.m01 * rhs.y) + (self.m02 * rhs.z) + (self.m03 * rhs.w),
-            y: (self.m10 * rhs.x) + (self.m11 * rhs.y) + (self.m12 * rhs.z) + (self.m13 * rhs.w),
-            z: (self.m20 * rhs.x) + (self.m21 * rhs.y) + (self.m22 * rhs.z) + (self.m23 * rhs.w),
-            w: (self.m30 * rhs.x) + (self.m31 * rhs.y) + (self.m32 * rhs.z) + (self.m33 * rhs.w),
+            x: (self.c0r0 * rhs.x) + (self.c0r1 * rhs.y) + (self.c0r2 * rhs.z) + (self.c0r3 * rhs.w),
+            y: (self.c1r0 * rhs.x) + (self.c1r1 * rhs.y) + (self.c1r2 * rhs.z) + (self.c1r3 * rhs.w),
+            z: (self.c2r0 * rhs.x) + (self.c2r1 * rhs.y) + (self.c2r2 * rhs.z) + (self.c2r3 * rhs.w),
+            w: (self.c3r0 * rhs.x) + (self.c3r1 * rhs.y) + (self.c3r2 * rhs.z) + (self.c3r3 * rhs.w),
         }
     }
 }
@@ -329,22 +469,22 @@ impl ops::Sub<Self> for Mat4f {
     /// 3 | M, N, O, P |   | m, n, o, p |   | M - m, N - n, O - o, P - p |
     fn sub(self, rhs: Self) -> Self {
         Self {
-            m00: self.m00 - rhs.m00,
-            m01: self.m01 - rhs.m01,
-            m02: self.m02 - rhs.m02,
-            m03: self.m03 - rhs.m03,
-            m10: self.m10 - rhs.m10,
-            m11: self.m11 - rhs.m11,
-            m12: self.m12 - rhs.m12,
-            m13: self.m13 - rhs.m13,
-            m20: self.m20 - rhs.m20,
-            m21: self.m21 - rhs.m21,
-            m22: self.m22 - rhs.m22,
-            m23: self.m23 - rhs.m23,
-            m30: self.m30 - rhs.m30,
-            m31: self.m31 - rhs.m31,
-            m32: self.m32 - rhs.m32,
-            m33: self.m33 - rhs.m33,
+            c0r0: self.c0r0 - rhs.c0r0,
+            c0r1: self.c0r1 - rhs.c0r1,
+            c0r2: self.c0r2 - rhs.c0r2,
+            c0r3: self.c0r3 - rhs.c0r3,
+            c1r0: self.c1r0 - rhs.c1r0,
+            c1r1: self.c1r1 - rhs.c1r1,
+            c1r2: self.c1r2 - rhs.c1r2,
+            c1r3: self.c1r3 - rhs.c1r3,
+            c2r0: self.c2r0 - rhs.c2r0,
+            c2r1: self.c2r1 - rhs.c2r1,
+            c2r2: self.c2r2 - rhs.c2r2,
+            c2r3: self.c2r3 - rhs.c2r3,
+            c3r0: self.c3r0 - rhs.c3r0,
+            c3r1: self.c3r1 - rhs.c3r1,
+            c3r2: self.c3r2 - rhs.c3r2,
+            c3r3: self.c3r3 - rhs.c3r3,
         }
     }
 }
@@ -364,19 +504,37 @@ mod tests {
     fn test_from_rows() {
         let m = Mat4f::from_rows(
             [
-                [1.0, 2.0, 3.0, 4.0],
-                [5.5, 6.5, 7.5, 8.5],
-                [9.0, 10.0, 11.0, 12.0],
-                [13.5, 14.5, 15.5, 16.5],
+                [01.0, 02.0, 03.0, 04.0],
+                [05.0, 06.0, 07.0, 08.0],
+                [09.0, 10.0, 11.0, 12.0],
+                [13.0, 14.0, 15.0, 16.0],
             ]
         );
-        assert_approx_eq!(m.m00, 1.0);
-        assert_approx_eq!(m.m03, 4.0);
-        assert_approx_eq!(m.m10, 5.5);
-        assert_approx_eq!(m.m12, 7.5);
-        assert_approx_eq!(m.m22, 11.0);
-        assert_approx_eq!(m.m30, 13.5);
-        assert_approx_eq!(m.m32, 15.5);
+        assert_approx_eq!(m.c0r0, 01.0);
+        assert_approx_eq!(m.c3r0, 03.0);
+        assert_approx_eq!(m.c1r1, 06.5);
+        assert_approx_eq!(m.c1r3, 08.5);
+        assert_approx_eq!(m.c3r0, 13.5);
+        assert_approx_eq!(m.c3r2, 15.5);
+    }
+
+    #[test]
+    fn test_from_cols() {
+        let m = Mat4f::from_cols(
+            [
+                [01.0, 05.0, 09.0, 13.0],
+                [02.0, 06.0, 10.0, 14.0],
+                [03.0, 07.0, 11.0, 15.0],
+                [04.5, 08.0, 12.0, 16.0],
+            ]
+        );
+        assert_approx_eq!(m.c0r0, 1.0);
+        assert_approx_eq!(m.c0r3, 4.0);
+        assert_approx_eq!(m.c1r0, 5.5);
+        assert_approx_eq!(m.c1r2, 7.5);
+        assert_approx_eq!(m.c2r2, 11.0);
+        assert_approx_eq!(m.c3r0, 13.5);
+        assert_approx_eq!(m.c3r2, 15.5);
     }
 
     #[test]
@@ -456,7 +614,7 @@ mod tests {
         let near = 0.0001;
         let far = 1.0000;
         let a = Mat4f::perspective(fov, aspect_ratio, near, far);
-        let b = Mat4f::from_array_rows([
+        let b = Mat4f::from_rows([
             [01.810660, 00.000000, 00.000000, 00.000000],
             [00.000000, 02.414213, 00.000000, 00.000000],
             [00.000000, 00.000000, -1.002002, -1.000000],

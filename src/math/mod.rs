@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+//! Column Major math Library
+
 mod mat2f;
 mod mat3f;
 mod mat4f;

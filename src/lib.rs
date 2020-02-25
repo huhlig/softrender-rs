@@ -13,9 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-#![forbid(unsafe_code)]
 
-pub mod canvas;
+#![forbid(unsafe_code)]
+#![warn(clippy::pedantic)]
+
+//pub mod canvas;
 pub mod math;
 //pub mod model;
 //mod rasterizer;
